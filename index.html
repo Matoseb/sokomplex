@@ -1,10 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="utf-8">
-	<title>sokomplex</title>
+    <title>𝗌𝗈𝗄𝗈𝗆𝗉𝗅𝖾𝗑</title>
+    <!-- <meta name="viewport" content="width=device-width"> -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Sokomplex" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="google" content="notranslate" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#7a7a7a">
+    <link rel="shortcut icon" href="/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="msapplication-config" content="/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#3e3e3e">
+    <style>
+        html, body {
+        	position: fixed;
+			background: black;
+			margin: 0;
+			overflow: hidden;
+			/*width: 100%;*/
+			/*height: 100%;*/
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			touch-action: manipulation;
+			image-rendering: pixelated;
+
+			-webkit-user-select: none;  /* Chrome all / Safari all */
+  			-moz-user-select: none;     /* Firefox all */
+  			-ms-user-select: none;      /* IE 10+ */
+  			user-select: none;          /* Likely future */      
+		}
+
+		#info {
+			position: absolute;
+			top: 0px;
+			width: 100%;
+			padding: 5px;
+		}
+
+		#webglmessage {
+			color: #da0;
+		}
+
+		#notSupported {
+			width: 50%;
+			margin: auto;
+			border: 2px red solid;
+			margin-top: 20px;
+			padding: 10px;
+		}
+
+		#container {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        	touch-action: manipulation;
+  			/*opacity: 1;*/
+		}
+
+	</style>
 </head>
+
 <body>
-	<div>test page</div>
+    <div id="container" onclick>
+    </div>
+    <div id="info">
+        <div id="notSupported" style="display:none">Sorry your graphics card + browser does not support hardware instancing</div>
+    </div>
+    <script src="js/libs/three.min.js"></script>
+    <script src="js/libs/WebGL.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/utilities.js"></script>
+
+    <script src="js/audio.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/objects.js"></script>
+    <script src="js/teleport.js"></script>
+    <script src="js/blockactions.js"></script>
+    <script id="vertexShader" type="x-shader/x-vertex">
+        precision highp float;
+
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+		uniform float fogHeight;
+		uniform float currTime;
+		uniform float depthFactor;
+		// uniform vec3 downForce[1];
+
+		uniform float forces[5];		//[mouse 3d x, mouse 3d y, force x, force y, force z]
+
+		const float sq256 = 256. * 256.;
+
+		const float sq461 = 512. * 512.;
+
+		const float mag = 4.;
+
+		attribute vec3 vertexPos;	//posistion of vertices
+		attribute vec2 uv;
+		
+		attribute vec3 _pos;
+		attribute vec3 pos;
+
+		attribute float _col;
+		attribute float col;
+
+		attribute float _time;
+		attribute float speed;
+
+		varying vec2 vUv;
+		varying vec3 vColors;
+		varying float vPosY;
+
+    	// float easeOutCubic (float t) {return (--t)*t*t+1.0;}
+		float easeOutQuad (const in float t) { return t*(2.0-t); }
+
+		float sq (const in float n) { return n*n; }
+
+		vec3 unpackColor(const in float f) {
+		    vec3 color;
+		    color.b = floor(f / sq461);
+		    float tmp = f - color.b * sq461;
+		    color.g = floor(tmp / 512.);
+		    color.r = floor(tmp - color.g * 512.);
+		    return color / 255.;
+		}
+
+		void main() {
+			vUv = uv;
+			
+			vec3 col_ = unpackColor(col);
+			vec3 _col_ = unpackColor(_col);
+			vec3 vPos = vertexPos;
+
+			//interpolation
+			float eased = easeOutQuad(clamp((currTime - _time)/speed,0.,1.));
+
+			vec3 easedPos = (pos - _pos) * eased + _pos;
+			float forceAmt = -(sq(easedPos.x - forces[0]) + sq(easedPos.z - forces[1])) / sq(mag * forces[3]);
+
+			vPos += easedPos - vec3(forces[2], forces[3], forces[4]) * pow(2.,forceAmt);
+			vColors = (col_ - _col_) * eased + _col_;
+
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos, 1. );
+           			
+			vPosY = easeOutQuad(abs(fogHeight - vPos.y)/depthFactor);
+		}
+
+	</script>
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        precision highp float;
+
+		uniform sampler2D map;
+		varying vec2 vUv;
+		varying float vPosY;
+		varying vec3 vColors;
+
+		void main() {
+			gl_FragColor = vec4(vColors * texture2D(map, vUv).rgb - vPosY,1.);
+		}
+	</script>
+    <script src="js/main.js"></script>
 </body>
+
 </html>
