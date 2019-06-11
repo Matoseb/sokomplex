@@ -67,10 +67,11 @@ const UTILS = {
         return new Promise(resolve => {
             let audio = new Audio(url);
             audio.type = type;
-            audio.onloadeddata = function() {
-                if (this.readyState > 3)
-                    resolve(this);
-            }
+            // audio.onloadeddata = function() {
+            //     if (this.readyState > 1)
+            //         resolve(this);
+            // }
+            resolve(audio);
         });
     },
 

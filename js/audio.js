@@ -46,8 +46,8 @@ const AUDIO = {
             let infos = bufferInfo[name];
 
             if (infos.stream) {
-
                 this.streams[name] = UTILS.stream(infos.url, 'audio/mp3');
+                promises.unshift(Promise.resolve());
 
             } else {
                 this.createAudioNode(infos.type, 'DynamicsCompressor');
@@ -62,10 +62,9 @@ const AUDIO = {
         await Promise.all(promises).then(values => {
 
             for (let i = values.length; i--;) {
-
                 let infos = bufferInfo[keys[i]];
-
-                loadedBuffers[keys[i]] = values[i];
+                if (values[i] !== undefined)
+                    loadedBuffers[keys[i]] = values[i];
             }
         });
 
@@ -97,10 +96,10 @@ const AUDIO = {
         async stream(name, { loop = true, action, volume, fadeIn }) {
             let source = await this.streams[name];
             source.loop = loop;
-            source.onplay = _ => {
-                source.volume = 0;
-                this.linearRampToValueAtTime(source, 'volume', 1, this.context.currentTime + 2);
-                this.enableWithClick.delete(source);
+            source.volume = 0.00001;
+            source.onplay = e => {
+                this.enableWithClick.delete(e.target);
+                this.linearRampToValueAtTime(e.target, 'volume', 1, this.context.currentTime + 2);
             }
             source.play().catch(_ => {
                 this.enableWithClick.set(source, this.stream.bind(this, ...arguments))
@@ -162,14 +161,15 @@ const AUDIO = {
 async function initAudio() {
 
     AUDIO.init({
+        'backgroundMusic': { url: 'rsrc/audio/music/ambient_1.mp3', type: 'music', stream: true },
         'slide': { url: 'rsrc/audio/noise/slidebox.wav', type: 'noise' },
         'success': { url: 'rsrc/audio/noise/success.wav', type: 'noise' },
         'activeGoal': { url: 'rsrc/audio/noise/goal_active.mp3', type: 'noise' },
-        'backgroundMusic': { url: 'rsrc/audio/music/ambient_1.mp3', type: 'music', stream: true },
     });
 
     await AUDIO.ready;
     console.log('audio ready!');
+
     AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: .5, fadeIn: 2 });
     // AUDIO.nodes['noise'].gain.value = 0.3;
 
