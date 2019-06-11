@@ -33,6 +33,8 @@ const MOVEMENT = {
         if (!MOUSE.pressed || PUSHEDCUBES.get(PLAYER))
             return;
 
+        let playerPos = instanceToWorldPos(PLAYER);
+
         let t = [Math.round(MOUSE.player3d.x), 0, Math.round(MOUSE.player3d.z)],
             wayX; //1 if move on x, 0 on y
 
@@ -150,13 +152,21 @@ const MOVEMENT = {
             //obstacle in diagonal this
             else {
                 this.needRecalc = true;
-                //check other side
-                let move2 = this.moves[1 - wayX],
-                    hit2 = hit(PLAYER, move2);
 
-                if (!hit2.props) {
+
+                //check other side
+                let way = wayX * 2,
+                    move2 = this.moves[1 - wayX],
+                    hit2 = hit(PLAYER, move2),
+                    dist = Math.abs(this.p[way] - this.t[way]) > 1;
+
+                if (hit1.props[1] === 2 && (hit2.props || dist)) {
+                    this.pushBox(way, hit1, move1);
+                } else if (!hit2.props) {
                     MOVETYPES.pushBlock(PLAYER, { nBlock: hit2, move: move2 });
                 }
+
+
             }
         }
     },
@@ -404,7 +414,7 @@ function activateGoal(goalProps, speed) {
         } else {
             WORLD.interact = false;
             PUSHEDCUBES.clear();
-            
+
             setTimeout(_ => loadLevel(level.done), speed);
         }
     }
