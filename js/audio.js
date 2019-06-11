@@ -46,7 +46,7 @@ const AUDIO = {
             let infos = bufferInfo[name];
 
             if (infos.stream) {
-                this.streams[name] = UTILS.stream(infos.url, 'audio/mp3');
+                this.streams[name] = UTILS.stream(infos.url, 'audio/mp3', 2);
                 promises.unshift(Promise.resolve());
 
             } else {
@@ -94,10 +94,11 @@ const AUDIO = {
         },
 
         async stream(name, { loop = true, action, volume, fadeIn }) {
-            let source = await this.streams[name];
+            let source = this.streams[name].audio;
             source.loop = loop;
             source.volume = 0.00001;
-            source.onplay = e => {
+            source.onplay = async e => {
+                await this.streams[name].loaded;
                 this.enableWithClick.delete(e.target);
                 this.linearRampToValueAtTime(e.target, 'volume', 1, this.context.currentTime + 2);
             }
@@ -170,10 +171,15 @@ async function initAudio() {
     await AUDIO.ready;
     console.log('audio ready!');
 
+
     AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: .5, fadeIn: 2 });
     // AUDIO.nodes['noise'].gain.value = 0.3;
 
     window.addEventListener('mousedown', async function() {
+        AUDIO.play('activeGoal', { delay: 0, volume: 1, rate: 1 });
+    });
+
+    window.addEventListener('touchstart', async function() {
         AUDIO.play('activeGoal', { delay: 0, volume: 1, rate: 1 });
     });
 }

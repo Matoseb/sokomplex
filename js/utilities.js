@@ -63,16 +63,18 @@ const UTILS = {
         return p;
     },
 
-    stream(url, type) {
-        return new Promise(resolve => {
-            let audio = new Audio(url);
-            audio.type = type;
-            // audio.onloadeddata = function() {
-            //     if (this.readyState > 1)
-            //         resolve(this);
-            // }
-            resolve(audio);
+    stream(url, type, minState = 4) {
+        let audio = new Audio(url);
+        audio.type = type;
+
+        let loaded = new Promise(resolve => {
+            audio.onloadeddata = function() {
+                if (this.readyState >= minState)
+                    resolve(true);
+            }
         });
+
+        return { audio: audio, loaded: loaded };
     },
 
     readFile(url, type) {
