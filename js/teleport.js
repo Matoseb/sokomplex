@@ -29,6 +29,8 @@ function reloadLevel() {
     if (!WORLD.interact)
         return;
 
+    AUDIO.muteContinues();
+
     //set player fist !!!!
 
     WORLD.interact = false;
@@ -180,6 +182,9 @@ const CHUNKS_ = {
         Object.assign(this.lowest, data.lowest);
     },
 
+    calcDelay(y) {
+        return TELEPORT.delay * (this.bounds.right - this.bounds.left + this.bounds.bottom - this.bounds.top + y * 2) + WORLD_INFO.speed;
+    },
     loaded() {
         this.unloadList--;
 
@@ -189,16 +194,13 @@ const CHUNKS_ = {
             this.changePlace();
 
             let y = 0; //add height delay
-            let delay = TELEPORT.waitEnd ? TELEPORT.delay * (this.bounds.right - this.bounds.left + this.bounds.bottom - this.bounds.top + y * 2) +
-                WORLD_INFO.speed :
-                0;
+            let delay = TELEPORT.waitEnd ? this.calcDelay(y) : 0;
 
             CLOCK.setCallback(_ => {
                 WORLD.render = false;
                 this.clearAllchunks();
                 this.setNewChunks();
                 WORLD.render = true;
-                WORLD.interact = true;
                 TELEPORT.animate = false;
             }, delay);
         }
@@ -231,6 +233,10 @@ const CHUNKS_ = {
 
             chunk.clear();
         }
+
+        CLOCK.setCallback(_ => {
+            WORLD.interact = true;
+        }, this.calcDelay(0) * 0.5);
 
         this.lowest = {};
         this.newChunks.clear();

@@ -3,9 +3,9 @@
  * @author mr.doob / http://mrdoob.com/
  */
 
-var WEBGL = {
+var WEBGL_ = {
 
-    isWebGLAvailable: function() {
+    isWebGLAvailable() {
 
         try {
 
@@ -20,7 +20,7 @@ var WEBGL = {
 
     },
 
-    isWebGL2Available: function() {
+    isWebGL2Available() {
 
         try {
 
@@ -35,35 +35,36 @@ var WEBGL = {
 
     },
 
-    getWebGLErrorMessage: function() {
+    getWebGLErrorMessage() {
 
         return this.getErrorMessage(1);
 
     },
 
-    getWebGL2ErrorMessage: function() {
+    getWebGL2ErrorMessage() {
 
         return this.getErrorMessage(2);
 
     },
 
-    getErrorMessage: function(version) {
+    getErrorMessage(version = 1, info = 1) {
 
-        var names = {
+        let names = {
             1: '𝖶𝖾𝖻𝖦𝖫',
-            2: '𝖶𝖾𝖻𝖦𝖫 𝟤'
+            2: '𝖶𝖾𝖻𝖦𝖫 𝟤',
+            3: '𝖶𝖾𝖻𝖦𝖫 𝖠𝖭𝖦𝖫𝖤_𝗂𝗇𝗌𝗍𝖺𝗇𝖼𝖾𝖽_𝖺𝗋𝗋𝖺𝗒𝗌'
         };
 
-        var contexts = {
+        let contexts = {
             1: window.WebGLRenderingContext,
             2: window.WebGL2RenderingContext
         };
 
-        var message = '𝖸𝗈𝗎𝗋 $0 𝖽𝗈𝖾𝗌 𝗇𝗈𝗍 𝗌𝖾𝖾𝗆 𝗍𝗈 𝗌𝗎𝗉𝗉𝗈𝗋𝗍 $1</a>';
+        let message = '𝖸𝗈𝗎𝗋 $0 𝖽𝗈𝖾𝗌 𝗇𝗈𝗍 𝗌𝖾𝖾𝗆 𝗍𝗈 𝗌𝗎𝗉𝗉𝗈𝗋𝗍 $1';
 
-        var element = document.createElement('a');
+        let element = document.createElement('div');
         element.id = 'webglmessage';
-        element.href = "http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation"
+        // element.href = "http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation";
 
         if (contexts[version]) {
 
@@ -75,9 +76,8 @@ var WEBGL = {
 
         }
 
-        message = message.replace('$1', names[version]);
-
-        element.innerHTML = message;
+        message = message.replace('$1', names[info]);
+        element.textContent = message;
         element.offsetWidth;
         setTimeout(_ => element.style.opacity = 1);
 
@@ -85,4 +85,4 @@ var WEBGL = {
 
     }
 
-};
+}

@@ -1,8 +1,14 @@
 'use strict';
 
-if (WEBGL.isWebGLAvailable() === false) {
-    document.body.appendChild(WEBGL.getWebGLErrorMessage());
+
+
+
+if (WEBGL_.isWebGLAvailable() === false) {
+
+    document.body.appendChild(WEBGL_.getWebGLErrorMessage());
 }
+
+
 
 const DOM = {
     width: 0,
@@ -57,8 +63,8 @@ const INSTANCES = new Map();
 // let CHUNKWORKERS;
 
 async function init() {
-    setupScene();
 
+    setupScene();
     BRUTEFORCE.init(30);
 
     indexedDB.deleteDatabase("appData");
@@ -131,8 +137,8 @@ function setupScene() {
     DOM.width = DOM.container.offsetWidth;
     DOM.height = DOM.container.offsetHeight;
 
-
     WORLD.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+
 
     WORLD.renderer.setPixelRatio(2 || window.devicePixelRatio);
     WORLD.renderer.setSize(DOM.width, DOM.height);
@@ -151,11 +157,12 @@ function setupScene() {
     WORLD.scene.background = new THREE.Color(0); //0xaaaaaa
 
     if (WORLD.renderer.extensions.get('ANGLE_instanced_arrays') === null) {
-        document.getElementById("notSupported").style.display = "";
+        document.body.appendChild(WEBGL_.getErrorMessage(undefined, 3));
         return;
     }
 
     CUBE.geometry = new THREE.InstancedBufferGeometry();
+
 
     //LAYOUT:
     //vertexBuffer: vertex x, vertex y, vertex z, uvX, uvY
@@ -251,6 +258,8 @@ function setupScene() {
         WORLD.stats = new Stats();
         DOM.container.appendChild(WORLD.stats.dom);
     }
+
+
 
 }
 
@@ -402,8 +411,8 @@ function update() {
 
 function render() {
 
+    AUDIO.update();
     MOUSE.updateForces();
-
     CAMERA.updateEasing();
 
 
@@ -416,6 +425,8 @@ function render() {
         blockInteraction();
         CHUNKS_.update(CAMERA.position.x, CAMERA.position.z);
     }
+
+    
 
     if (WORLD.render)
         WORLD.renderer.render(WORLD.scene, CAMERA);

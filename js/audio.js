@@ -6,11 +6,17 @@ const AUDIO = {
     buffers: {},
     streams: {},
 
+    timings: new Map(),
+    continues: new Map(),
+
+    time: 0,
     ready: new Promise(_ => {}),
     allowed: new UTILS.DeferredPromise(),
 
     async init(bufferInfo) {
         this.context = new(window.AudioContext || window.webkitAudioContext)();
+
+        this.context.resume().then(this.enable.bind(this));
 
         this.sounds = bufferInfo;
 
@@ -77,7 +83,8 @@ const AUDIO = {
 
     //methods that needs user input to work properly, are overwritten when user input
     methods: {
-        play: function(name, { delay = 0, volume = 1, rate = 1 }) {
+
+        play: function(name, { delay = 0, volume = 1, rate = 1, loop = false }) {
 
             let gainNode = this.context.createGain();
             let source = this.context.createBufferSource();
@@ -86,21 +93,21 @@ const AUDIO = {
 
             source.buffer = this.buffers[name];
             source.playbackRate.value = rate;
-            source.loop = this.sounds[name].loop;
+            source.loop = loop;
             source.connect(gainNode).connect(this.nodes[this.sounds[name].type]);
             source.start(this.context.currentTime + delay);
 
-            return source;
+            return [source, gainNode.gain];
         },
 
         async stream(name, { loop = true, action, volume, fadeIn }) {
             let source = this.streams[name].audio;
             source.loop = loop;
-            source.volume = 0.00001;
+            source.volume = 0.001;
             source.onplay = async e => {
                 await this.streams[name].loaded;
                 this.enableWithClick.delete(e.target);
-                this.linearRampToValueAtTime(e.target, 'volume', 1, this.context.currentTime + 2);
+                this.linearRampToValueAtTime(e.target, 'volume', volume, this.context.currentTime + 2);
             }
             source.play().catch(_ => {
                 this.enableWithClick.set(source, this.stream.bind(this, ...arguments))
@@ -127,12 +134,13 @@ const AUDIO = {
     },
 
     play: function(name, ...args) {
-        this.context.resume().then(this.enable.bind(this));
-        let n = this.methods.play.call(this, ...arguments);
+        this.context.resume();
+        return this.methods.play.call(this, ...arguments);
     },
 
     stream: function(name, ...args) {
-        this.context.resume().then(this.enable.bind(this));
+        this.context.resume();
+
         let n = this.methods.stream.call(this, ...arguments);
     },
 
@@ -144,18 +152,138 @@ const AUDIO = {
         }
     },
 
-    enable() {
-        if (this.allowed.state !== 'resolved' && this.context.state === 'running') {
+    bufferPlay: function(name, { delay = 0, volume = 1, rate = 1 }) {
+        let time = this.time + delay;
+        let names = this.timings.get(time);
 
-            this.volume.linearRampToValueAtTime(0.001, this.context.currentTime);
-            this.volume.linearRampToValueAtTime(1, this.context.currentTime + 2);
+        if (!names)
+            this.timings.set(time, names = {});
 
-            this.allowed.resolve();
+        let infos = names[name];
+        if (infos) {
+            ++infos[0];
+            infos[1] += volume;
+            infos[2] += rate;
+        } else {
+            names[name] = [1, volume, rate]; //how many, iterated volume, iterated rate => for average
+        }
 
-            for (let key in this.methods) {
-                this[key] = this.methods[key];
+    },
+
+    update() {
+        this.time = this.context.currentTime;
+
+        for (let [time, sounds] of this.timings) {
+            if (time <= this.time) {
+                //make sounds
+                for (let name in sounds) {
+                    let [amount, volumes, rates] = sounds[name];
+
+                    let iterations = Math.ceil(amount / 10),
+                        volume = Math.max(volume / (amount / 10), 2);
+
+                    for (; iterations--;) {
+                        this.play(name, {
+                            delay: Math.random() * 0.1,
+                            volume: volumes + UTILS.variate(.2),
+                            rate: (rates / amout) + UTILS.variate(.4)
+                        });
+                    }
+                }
+
+                this.timings.delete(time);
             }
         }
+
+        //remove continuous sound when timing is done
+        for (let [instance, names] of this.continues) {
+            for (let [name, props] of names) {
+                if (props[2] <= this.time) {
+                    props[0].disconnect();
+                    names.delete(name);
+                }
+            }
+
+            if (!names.size)
+                this.continues.delete(instance);
+        }
+    },
+
+    enable() {
+
+        // if (this.allowed.state !== 'resolved' && this.context.state === 'running') {
+
+        this.volume.linearRampToValueAtTime(0.001, this.context.currentTime);
+        this.volume.linearRampToValueAtTime(1, this.context.currentTime + 2);
+
+        this.allowed.resolve();
+
+        for (let key in this.methods) {
+            this[key] = this.methods[key];
+        }
+        // }
+        // else {
+        //     this.context.resume(this.enable.bind(this));
+        // }
+    },
+
+    muteContinues() {
+        //remove continuous sound when restarting level or new level
+        for (let [instance, names] of this.continues) {
+            for (let [name, props] of names) {
+                this.continuous(instance, name, true, {
+                    volume: [
+                        [.25, 0]
+                    ]
+                });
+            }
+        }
+    },
+
+    continuous(instance, name, overwrite, { delay = 0, volume = [], rate = [] }) {
+        let contextTime = this.context.currentTime;
+        let names = this.continues.get(instance);
+
+        if (!names) {
+            this.continues.set(instance, names = new Map());
+        }
+
+        let curr = names.get(name); //curr = [buffernode, gain, end]
+
+        if (curr) {
+            if (overwrite) {
+                rate && curr[0].playbackRate.cancelScheduledValues(contextTime);
+                volume && curr[1].cancelScheduledValues(contextTime);
+
+                curr[0].playbackRate.linearRampToValueAtTime(curr[0].playbackRate.value, contextTime);
+                curr[1].linearRampToValueAtTime(curr[1].value, contextTime);
+            }
+        } else {
+            curr = this.play(name, { loop: true, delay: delay, volume: 0, rate: 0 });
+            names.set(name, curr);
+            overwrite = true;
+        }
+
+        // console.log(gain);
+
+        let end = contextTime;
+
+        for (let [time, value] of rate) {
+            let t = contextTime + time;
+            end = Math.max(end, t);
+
+            overwrite && curr[0].playbackRate.linearRampToValueAtTime(value, t);
+        }
+
+        for (let [time, value] of volume) {
+            let t = contextTime + time;
+            end = Math.max(end, t);
+
+            overwrite && curr[1].linearRampToValueAtTime(value, t);
+        }
+
+        curr[2] = end; //set maximum time of node
+
     },
 }
 
@@ -163,23 +291,23 @@ async function initAudio() {
 
     AUDIO.init({
         'backgroundMusic': { url: 'rsrc/audio/music/ambient_1.mp3', type: 'music', stream: true },
-        'slide': { url: 'rsrc/audio/noise/slidebox.wav', type: 'noise' },
+        'slide': { url: 'rsrc/audio/noise/slide_2.wav', type: 'noise' },
+        'slidebox': { url: 'rsrc/audio/noise/slidebox_2.wav', type: 'noise' },
+        'fall': { url: 'rsrc/audio/noise/fall_2.wav', type: 'noise' },
         'success': { url: 'rsrc/audio/noise/success.wav', type: 'noise' },
-        'activeGoal': { url: 'rsrc/audio/noise/goal_active.mp3', type: 'noise' },
+        'activeGoal': { url: 'rsrc/audio/noise/active_goal.mp3', type: 'noise' },
     });
 
     await AUDIO.ready;
     console.log('audio ready!');
 
+    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: 1, fadeIn: 2 });
 
-    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: .5, fadeIn: 2 });
-    // AUDIO.nodes['noise'].gain.value = 0.3;
+    //overwrite, prolongate
 
-    window.addEventListener('mousedown', async function() {
-        AUDIO.play('activeGoal', { delay: 0, volume: 1, rate: 1 });
-    });
+    // }, { once: true });
 
-    window.addEventListener('touchstart', async function() {
-        AUDIO.play('activeGoal', { delay: 0, volume: 1, rate: 1 });
-    });
+    // window.addEventListener('touchstart', async function() {
+    //     AUDIO.play('slide', { delay: 0, volume: 1, rate: 1 });
+    // });
 }

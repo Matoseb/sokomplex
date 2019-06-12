@@ -197,12 +197,29 @@ const MOVETYPES = {
         let result = hit(instance, [0, -1, 0]);
 
         let attributes = this.move(instance, options, wait, undefined, forced);
+
+
         MOVEMENT.wait = 0.8;
 
         if (options.move) {
             if (options.move[1]) {
+
+                AUDIO.continuous(instance, 'fall', false, {
+                    rate: [
+                        [0, 1],
+                        [5, 0.3]
+                    ],
+                    volume: [
+                        [0, 0],
+                        [0.4, 0.8],
+                        [5, 0]
+                    ]
+                });
+
                 //up or down
                 CAMERA.setFogHeight(attributes[6]);
+            } else {
+                AUDIO.play('slide', { volume: .3 + UTILS.variate(.1), rate: 1.2 + UTILS.variate(0.15) });
             }
             //if x z movement
             let result = hit(instance, [0, -1, 0]);
@@ -214,7 +231,6 @@ const MOVETYPES = {
                     LEVELS.exchangeBlock(instance, result.props[0], true);
                 }
             }
-
         }
     },
 
@@ -251,21 +267,38 @@ const MOVETYPES = {
             if (hit2.props && hit1.props) {
                 let newLevel = hit2.props[0];
                 if (newLevel === hit1.props[0] && newLevel !== LEVELS.currLevel) {
-                    console.log('hey');
+                    // console.log('hey');
                     LEVELS.exchangeBlock(instance, newLevel);
                 }
+            }
+
+            if (!options.move[1]) {
+                AUDIO.play('slidebox', { volume: .12 + UTILS.variate(.01), rate: 1 + UTILS.variate(0.15) });
+            } else if (options.move[1] < 0) {
+                AUDIO.continuous(instance, 'fall', false, {
+                    rate: [
+                        [0, 1],
+                        [5, 0.3]
+                    ],
+                    volume: [
+                        [0, 0],
+                        [0.4, 0.8],
+                        [5, 0]
+                    ]
+                });
             }
         }
 
     },
 
+    6: function(instance, options, wait, props) {
+        AUDIO.play('slide', { volume: .3 + UTILS.variate(.1), rate: 1.2 + UTILS.variate(0.15) });
+        this.move(instance, options, wait);
+    },
+
     switchOffButton(instance, tag) {
         let { coord, index, instance: _instance } = hit(instance, [0, -1, 0]);
         return moveDoors.bind(this, INSTANCES.get(_instance)[0], tag || coord + '_' + index);
-    },
-
-    6: function(instance, options, wait, props) {
-        this.move(instance, options, wait);
     },
 
     pushBlock(instance, options, wait = MOVEMENT.wait, forced) {
@@ -367,12 +400,13 @@ function blockInteraction() {
                         reloadLevel();
                     }
                     move[1] = 0;
+                } else {
+
+                    let opts = { move: move, nBlock: { chunk: chunk, index: index }, speed: Math.max(CUBE.speed.getX(instance) * 0.93, WORLD_INFO.speed * 0.35 /*0.37*/ ) },
+                        wait = .2;
+
+                    MOVETYPES.pushBlock(instance, opts, wait);
                 }
-
-                let opts = { move: move, nBlock: { chunk: chunk, index: index }, speed: Math.max(CUBE.speed.getX(instance) * 0.93, WORLD_INFO.speed * 0.35 /*0.37*/ ) },
-                    wait = .2;
-
-                MOVETYPES.pushBlock(instance, opts, wait);
             }
             //push button
             else if (instanceProps[1] === 2 && groundProps[1] === 4) {
@@ -394,6 +428,14 @@ function blockInteraction() {
 
                 //wait for finish falling
             } else if (timeDiff >= value.maxWait) {
+                let sound = (AUDIO.continues.get(instance) || new Map()).get('fall');
+                if (sound) {
+                    AUDIO.continuous(instance, 'fall', true, {
+                        volume: [
+                            [0.1, 0]
+                        ]
+                    });
+                }
 
                 PUSHEDCUBES.delete(instance);
             }

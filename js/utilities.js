@@ -77,6 +77,10 @@ const UTILS = {
         return { audio: audio, loaded: loaded };
     },
 
+    variate(amt) {
+        return Math.random() * amt - amt * .5;
+    },
+
     readFile(url, type) {
         return new Promise(resolve => {
             let req = new XMLHttpRequest();
