@@ -248,7 +248,7 @@ const AUDIO = {
             this.continues.set(instance, names = new Map());
         }
 
-        let curr = names.get(name); //curr = [buffernode, gain, end]
+        let curr = names.get(name); //curr = [buffernode, gain, end, iterations]
 
         if (curr) {
             if (overwrite) {
@@ -257,9 +257,12 @@ const AUDIO = {
 
                 curr[0].playbackRate.linearRampToValueAtTime(curr[0].playbackRate.value, contextTime);
                 curr[1].linearRampToValueAtTime(curr[1].value, contextTime);
+                curr[3] = 0;
             }
         } else {
             curr = this.play(name, { loop: true, delay: delay, volume: 0, rate: 0 });
+            curr[2] = curr[3] = 0;
+
             names.set(name, curr);
             overwrite = true;
         }
@@ -267,6 +270,8 @@ const AUDIO = {
         // console.log(gain);
 
         let end = contextTime;
+
+        curr[3]++;
 
         for (let [time, value] of rate) {
             let t = contextTime + time;
@@ -294,14 +299,15 @@ async function initAudio() {
         'slide': { url: 'rsrc/audio/noise/slide_2.wav', type: 'noise' },
         'slidebox': { url: 'rsrc/audio/noise/slidebox_2.wav', type: 'noise' },
         'fall': { url: 'rsrc/audio/noise/fall_2.wav', type: 'noise' },
+        'land': { url: 'rsrc/audio/noise/landing.wav', type: 'noise' },
         'success': { url: 'rsrc/audio/noise/success.wav', type: 'noise' },
-        'activeGoal': { url: 'rsrc/audio/noise/active_goal.mp3', type: 'noise' },
+        'goal_active': { url: 'rsrc/audio/noise/goal_active_2.wav', type: 'noise' },
     });
 
     await AUDIO.ready;
     console.log('audio ready!');
 
-    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: 1, fadeIn: 2 });
+    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: .5, fadeIn: 2 });
 
     //overwrite, prolongate
 
