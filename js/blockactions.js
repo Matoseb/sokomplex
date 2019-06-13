@@ -251,8 +251,12 @@ const MOVETYPES = {
                 AUDIO.continuous(instance, 'goal_active', true, {
                     loop: false,
                     asnew: false,
-                    volume: [[0.2, 0]],
-                    rate: [[1, 0.5]],
+                    volume: [
+                        [0.2, 0]
+                    ],
+                    rate: [
+                        [1, 0.5]
+                    ],
                 });
 
                 if (currLevel.active-- === currLevel.goals && typeof currLevel.done === 'string') {
@@ -471,7 +475,7 @@ function activateGoal(box, goalProps, speed) {
         loop: false,
         asnew: true,
         rate: [
-            [0, UTILS.map(level.active, .99, level.goals, 0.6, 1)]
+            [0, (level.active - level.goals) / level.goals * 0.5 + 1]
         ],
         volume: [
             [0, 0.1],

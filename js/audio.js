@@ -339,7 +339,7 @@ async function initAudio() {
     });
 
     await AUDIO.ready;
-    console.log('audio ready!');
+    console.log('audio ready');
 
     AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: .5, fadeIn: 2 });
 
