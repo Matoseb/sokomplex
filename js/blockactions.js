@@ -208,12 +208,12 @@ const MOVETYPES = {
                     AUDIO.continuous(instance, 'fall', false, {
                         rate: [
                             [0, 1],
-                            [1.5, 0.3]
+                            [1.5, 0.35]
                         ],
                         volume: [
                             [0, 0],
-                            [0.35, 0.8],
-                            [2, 0]
+                            [0.38, 0.6],
+                            [1.5, 0]
                         ]
                     });
                 }
@@ -247,6 +247,13 @@ const MOVETYPES = {
             if (behaviour === 3) {
 
                 let currLevel = LEVELS.curr[props[0]];
+
+                AUDIO.continuous(instance, 'goal_active', true, {
+                    loop: false,
+                    asnew: false,
+                    volume: [[0.2, 0]],
+                    rate: [[1, 0.5]],
+                });
 
                 if (currLevel.active-- === currLevel.goals && typeof currLevel.done === 'string') {
                     callback = this.switchOffButton(instance, currLevel.done);
@@ -426,7 +433,7 @@ function blockInteraction() {
                 changeCube(instance, Object.assign({}, BLOCKTYPE[instanceProps[2]], { speed: 100 }));
                 PUSHEDCUBES.delete(instance);
 
-                activateGoal(groundProps, 100);
+                activateGoal(instance, groundProps, 100);
 
                 //wait for finish falling
             } else if (timeDiff >= value.maxWait) {
@@ -436,8 +443,8 @@ function blockInteraction() {
                 if (cont && (sound = cont.get('fall'))) {
 
                     AUDIO.play('land', {
-                        volume: Math.min(.04 + sound[3] * 0.03, 0.3),
-                        rate: 1.2 + UTILS.variate(0.15)
+                        volume: Math.min(.03 + sound[3] * 0.03, 0.3),
+                        rate: 1.1 + UTILS.variate(0.15)
                     });
 
                     AUDIO.continuous(instance, 'fall', true, {
@@ -455,13 +462,21 @@ function blockInteraction() {
     MOVEMENT.movePlayer(BRUTEFORCE);
 }
 
-function activateGoal(goalProps, speed) {
+function activateGoal(box, goalProps, speed) {
     let level = LEVELS.curr[goalProps[0]];
     level.active++;
 
-    AUDIO.play('goal_active', {
-        volume: 0.5,
-        rate: UTILS.map(level.active, .99, level.goals, 0.5, 1)
+    console.log('activate');
+    AUDIO.continuous(box, 'goal_active', true, {
+        loop: false,
+        asnew: true,
+        rate: [
+            [0, UTILS.map(level.active, .99, level.goals, 0.6, 1)]
+        ],
+        volume: [
+            [0, 0.1],
+            [5, 0.1]
+        ]
     });
 
     if (level.active === level.goals) {

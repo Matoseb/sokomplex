@@ -240,7 +240,7 @@ const AUDIO = {
         }
     },
 
-    continuous(instance, name, overwrite, { delay = 0, volume = [], rate = [] }) {
+    playSave(instance, name, { delay = 0, volume = 1, rate = 1 }) {
         let contextTime = this.context.currentTime;
         let names = this.continues.get(instance);
 
@@ -251,23 +251,54 @@ const AUDIO = {
         let curr = names.get(name); //curr = [buffernode, gain, end, iterations]
 
         if (curr) {
-            if (overwrite) {
-                rate && curr[0].playbackRate.cancelScheduledValues(contextTime);
-                volume && curr[1].cancelScheduledValues(contextTime);
-
-                curr[0].playbackRate.linearRampToValueAtTime(curr[0].playbackRate.value, contextTime);
-                curr[1].linearRampToValueAtTime(curr[1].value, contextTime);
-                curr[3] = 0;
-            }
+            curr[0].playbackRate.cancelScheduledValues(contextTime);
+            curr[1].cancelScheduledValues(contextTime);
+            curr[0].playbackRate.value = rate;
+            curr[1].value = volume;
+            curr[3] = 0;
         } else {
-            curr = this.play(name, { loop: true, delay: delay, volume: 0, rate: 0 });
+            curr = this.play(name, { loop: false, delay: delay, volume: volume, rate: rate });
             curr[2] = curr[3] = 0;
 
             names.set(name, curr);
             overwrite = true;
         }
 
-        // console.log(gain);
+        curr[2] = contextTime + curr[0].buffer.duration * (1 / rate);
+        curr[3]++;
+
+    },
+
+    continuous(instance, name, overwrite, { asnew = false, loop = true, delay = 0, volume = [], rate = [] }) {
+        let contextTime = this.context.currentTime;
+        let names = this.continues.get(instance);
+
+        if (!names) {
+            this.continues.set(instance, names = new Map());
+        }
+
+        let curr = names.get(name); //curr = [buffernode, gain, end, iterations]
+
+        if (asnew && curr) {
+            curr[0].loop = curr = false;
+            names.delete(name);
+        }
+
+        if (curr) {
+            if (overwrite) {
+                rate && curr[0].playbackRate.cancelAndHoldAtTime(contextTime);
+                volume && curr[1].cancelAndHoldAtTime(contextTime);
+                // curr[0].playbackRate.linearRampToValueAtTime(curr[0].playbackRate.value, contextTime);
+                // curr[1].linearRampToValueAtTime(curr[1].value, contextTime);
+                curr[3] = 0;
+            }
+        } else {
+
+            curr = this.play(name, { loop: loop, delay: delay, volume: 0, rate: 0 });
+            curr[2] = curr[3] = 0;
+            names.set(name, curr);
+            overwrite = true;
+        }
 
         let end = contextTime;
 
@@ -286,6 +317,9 @@ const AUDIO = {
 
             overwrite && curr[1].linearRampToValueAtTime(value, t);
         }
+
+
+
 
         curr[2] = end; //set maximum time of node
 
@@ -313,7 +347,31 @@ async function initAudio() {
 
     // }, { once: true });
 
-    // window.addEventListener('touchstart', async function() {
-    //     AUDIO.play('slide', { delay: 0, volume: 1, rate: 1 });
+    // window.addEventListener('mousedown', async function() {
+    //     if (t) {
+    //         AUDIO.continuous(1, 'goal_active', true, {
+    //             loop: false,
+    //             asnew: true,
+    //             rate: [
+    //                 [0, 1]
+    //             ],
+    //             volume: [
+    //                 [0, 0.2],
+    //                 [5, 0]
+    //             ]
+    //         });
+    //     } else {
+    //         AUDIO.continuous(1, 'goal_active', true, {
+    //             loop: false,
+    //             asnew: false,
+    //             rate: [[0.2, 0.8]],
+    //             volume: [
+    //                 [0.1, 0],
+    //             ]
+    //         });
+    //     }
+
+    //     t = !t;
+
     // });
 }
