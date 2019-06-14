@@ -30,6 +30,7 @@ function reloadLevel() {
         return;
 
     AUDIO.muteContinues();
+    AUDIO.play('restart', { volume: .25, rate: 1.01 });
 
     //set player fist !!!!
 
@@ -64,7 +65,8 @@ function respawnBlock(instance, origPos, strProps, refs, currPos) {
     refs.moved++;
 
     let [y, type_] = getLowest(currPos, refs.movable);
-    let changes = Object.assign({}, BLOCKTYPE[type_], { brightness: 0, move: [0, y - currPos[1], 0] });
+    let dist = y - currPos[1];
+    let changes = Object.assign({}, BLOCKTYPE[type_], { brightness: 0, move: [0, dist, 0] });
     let [currChunk, currIndex] = worldPosToId(...currPos);
 
     currChunk && currChunk.delete(currIndex);
@@ -73,10 +75,14 @@ function respawnBlock(instance, origPos, strProps, refs, currPos) {
     // };
     changes.delay = Math.hypot(refs.playerPos[0] - currPos[0], refs.playerPos[2] - currPos[2]) * TELEPORT.delay;
 
+    let secDelay;
+    if (dist && 0 <= (secDelay = Math.round(changes.delay * 0.001 * 50) * 0.02)) {
+        AUDIO.bufferPlay('slide', { delay: secDelay, volume: 0.008 });
+    }
+
     changeCube(instance, changes);
 
     CLOCK.setCallback(_ => {
-
 
         let [y_, type_] = getLowest(origPos, refs.movable);
         let attr = CUBE.instanceBuffer.__passAttributes(instance);
@@ -91,7 +97,12 @@ function respawnBlock(instance, origPos, strProps, refs, currPos) {
 
         let props = JSON.parse(strProps);
         let type = props[1] || 0;
-        let changes = Object.assign({ move: [0, origPos[1] - y_, 0] }, BLOCKTYPE[type]);
+        let dist = origPos[1] - y_;
+        let changes = Object.assign({ move: [0, dist, 0] }, BLOCKTYPE[type]);
+
+        if (dist) {
+            AUDIO.bufferPlay('slide', { delay: 0, volume: 0.008 });
+        }
 
         BLOCKTYPE['f' + type]({
             changes: changes,
@@ -257,6 +268,9 @@ const CHUNKS_ = {
 
         let remains = {};
 
+        let blocksX = Math.ceil(CAMERA.viewWidth / WORLD_INFO.blockSize);
+        let blocksZ = Math.ceil(CAMERA.viewHeight / WORLD_INFO.blockSize);
+
         for (let [chunkName, chunk] of CHUNKS) {
             for (let [pos, instance] of chunk) {
                 let coord = UTILS.stringToArray(chunkName);
@@ -276,8 +290,18 @@ const CHUNKS_ = {
                 }
 
                 let dist = low - y;
-                changes.delay = TELEPORT.delay * (x - this.bounds.left + z - this.bounds.top + y * 2);
+                let viewportX = x - this.bounds.left;
+                let viewportZ = z - this.bounds.top;
+
+                changes.delay = TELEPORT.delay * (viewportX + viewportZ + y * 2);
                 changes.move = [0, dist, 0];
+
+                let secDelay;
+
+                if (dist && 0 <= (secDelay = Math.round(changes.delay * 0.001 * 50) * 0.02) &&
+                    viewportX <= blocksX && viewportZ <= blocksZ) {
+                    AUDIO.bufferPlay('slide', { delay: secDelay, volume: 0.008 });
+                }
 
                 changeCube(instance, changes);
             }

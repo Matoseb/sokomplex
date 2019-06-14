@@ -248,6 +248,7 @@ const MOVETYPES = {
 
                 let currLevel = LEVELS.curr[props[0]];
 
+                AUDIO.play('goal_disable', { volume: .1, rate: 1 });
                 AUDIO.continuous(instance, 'goal_active', true, {
                     loop: false,
                     asnew: false,
@@ -265,6 +266,21 @@ const MOVETYPES = {
 
             } else if (behaviour === 4) {
                 callback = this.switchOffButton(instance);
+
+
+                AUDIO.play('button_disable', { volume: .1, rate: 1 });
+                AUDIO.continuous(instance, 'button_active', true, {
+                    loop: false,
+                    asnew: false,
+                    volume: [
+                        [0.2, 0]
+                    ],
+                    rate: [
+                        [1, 0.5]
+                    ],
+                });
+
+
             }
 
             props[2] = 2;
@@ -423,6 +439,19 @@ function blockInteraction() {
             }
             //push button
             else if (instanceProps[1] === 2 && groundProps[1] === 4) {
+                AUDIO.continuous(instance, 'button_active', true, {
+                    loop: false,
+                    asnew: true,
+                    rate: [
+                        [0, 0.7],
+                        [0.12, 1.1]
+                    ],
+                    volume: [
+                        [0, 0.1],
+                        [5, 0.1]
+                    ]
+                });
+
 
                 instanceProps[2] = groundProps[1]; //change appearance
                 PUSHEDCUBES.delete(instance);
@@ -470,7 +499,6 @@ function activateGoal(box, goalProps, speed) {
     let level = LEVELS.curr[goalProps[0]];
     level.active++;
 
-    console.log('activate');
     AUDIO.continuous(box, 'goal_active', true, {
         loop: false,
         asnew: true,
@@ -478,12 +506,15 @@ function activateGoal(box, goalProps, speed) {
             [0, (level.active - level.goals) / level.goals * 0.5 + 1]
         ],
         volume: [
-            [0, 0.1],
-            [5, 0.1]
+            [0, 0.15],
+            [5, 0.15]
         ]
     });
 
     if (level.active === level.goals) {
+
+        AUDIO.play('win', { delay: 0, volume: 0.4, rate: 1.2});
+
         //activate doors
         if (typeof level.done === "string") {
             moveDoors(goalProps[0], level.done);

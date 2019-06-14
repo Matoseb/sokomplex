@@ -86,7 +86,7 @@ const LEVELS = {
                 curr.done = buttonName;
             } else {
                 curr.done = levelInfo.s;
-            }            
+            }
         }
     },
 
@@ -245,8 +245,14 @@ const CALLBACKS = {
                     CUBE._col.setX(instance, BLOCKTYPE.dark);
                 }
 
-                changes.move = [0, py - py_, 0];
+                let dist = py - py_;
+
+                changes.move = [0, dist, 0];
                 changes.delay = TELEPORT.delay * (px - TELEPORT.appearX + pz - TELEPORT.appearZ + py * 2);
+
+                let secDelay;
+                if (dist && 0 <= (secDelay = Math.round(changes.delay * 0.001 * 50) * 0.02))
+                    AUDIO.bufferPlay('slide', { delay: secDelay, volume: .008 });
             }
 
             BLOCKTYPE['f' + type]({

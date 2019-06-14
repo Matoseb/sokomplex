@@ -170,23 +170,28 @@ const AUDIO = {
 
     },
 
+    variate(numb, amt /*0 to 1*/ ) {
+        return numb - numb * (Math.random() * amt - amt * .5);
+    },
+
     update() {
         this.time = this.context.currentTime;
 
+
         for (let [time, sounds] of this.timings) {
-            if (time <= this.time) {
+            if (time - .005 <= this.time) {
                 //make sounds
                 for (let name in sounds) {
                     let [amount, volumes, rates] = sounds[name];
 
-                    let iterations = Math.ceil(amount / 10),
-                        volume = Math.max(volume / (amount / 10), 2);
+                    let iterations = Math.ceil(amount * .2),
+                        volume = Math.min(volumes / (amount * .1), 2);
 
                     for (; iterations--;) {
                         this.play(name, {
-                            delay: Math.random() * 0.1,
-                            volume: volumes + UTILS.variate(.2),
-                            rate: (rates / amout) + UTILS.variate(.4)
+                            delay: Math.random() * 0.01,
+                            volume: this.variate(volume, .01),
+                            rate: this.variate(rates / amount, .01)
                         });
                     }
                 }
@@ -333,45 +338,25 @@ async function initAudio() {
         'slide': { url: 'rsrc/audio/noise/slide_2.wav', type: 'noise' },
         'slidebox': { url: 'rsrc/audio/noise/slidebox_2.wav', type: 'noise' },
         'fall': { url: 'rsrc/audio/noise/fall_2.wav', type: 'noise' },
-        'land': { url: 'rsrc/audio/noise/landing.wav', type: 'noise' },
+        'land': { url: 'rsrc/audio/noise/landing_2.wav', type: 'noise' },
         'success': { url: 'rsrc/audio/noise/success.wav', type: 'noise' },
         'goal_active': { url: 'rsrc/audio/noise/goal_active_2.wav', type: 'noise' },
+        'goal_disable': { url: 'rsrc/audio/noise/goal_disable.wav', type: 'noise' },
+        'restart': { url: 'rsrc/audio/noise/restart_4.wav', type: 'noise' },
+        'button_active': { url: 'rsrc/audio/noise/button_active.wav', type: 'noise' },
+        'button_disable': { url: 'rsrc/audio/noise/button_disable.wav', type: 'noise' },
+        'win': { url: 'rsrc/audio/noise/win_3.wav', type: 'noise' },
     });
 
     await AUDIO.ready;
     console.log('audio ready');
 
-    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: .5, fadeIn: 2 });
+    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: 0.8, fadeIn: 2 });
 
-    //overwrite, prolongate
+    // window.addEventListener('mousedown', function() {
 
-    // }, { once: true });
-
-    // window.addEventListener('mousedown', async function() {
-    //     if (t) {
-    //         AUDIO.continuous(1, 'goal_active', true, {
-    //             loop: false,
-    //             asnew: true,
-    //             rate: [
-    //                 [0, 1]
-    //             ],
-    //             volume: [
-    //                 [0, 0.2],
-    //                 [5, 0]
-    //             ]
-    //         });
-    //     } else {
-    //         AUDIO.continuous(1, 'goal_active', true, {
-    //             loop: false,
-    //             asnew: false,
-    //             rate: [[0.2, 0.8]],
-    //             volume: [
-    //                 [0.1, 0],
-    //             ]
-    //         });
+    //     for (let i = 20; i--;) {
+    //         AUDIO.bufferPlay('slide', { delay: .5, volume: 0.01 });
     //     }
-
-    //     t = !t;
-
     // });
 }
