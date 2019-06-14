@@ -1,3 +1,9 @@
+//cancelAndHoldAtTime polyfill
+AudioParam.prototype.cancelAndHoldAtTime = window.AudioParam.prototype.cancelAndHoldAtTime || function(time) {
+    this.cancelScheduledValues(time);
+    this.setValueAtTime(this.value, time);
+}
+
 const AUDIO = {
     context: undefined,
     weakContext: undefined,
