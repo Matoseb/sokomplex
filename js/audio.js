@@ -90,6 +90,24 @@ const AUDIO = {
     //methods that needs user input to work properly, are overwritten when user input
     methods: {
 
+        bufferPlay: function(name, { delay = 0, volume = 1, rate = 1 }) {
+            let time = this.time + delay;
+            let names = this.timings.get(time);
+
+            if (!names)
+                this.timings.set(time, names = {});
+
+            let infos = names[name];
+            if (infos) {
+                ++infos[0];
+                infos[1] += volume;
+                infos[2] += rate;
+            } else {
+                names[name] = [1, volume, rate]; //how many, iterated volume, iterated rate => for average
+            }
+
+        },
+
         play: function(name, { delay = 0, volume = 1, rate = 1, loop = false }) {
 
             let gainNode = this.context.createGain();
@@ -139,6 +157,10 @@ const AUDIO = {
         media[prop + '_frame'] = requestAnimationFrame(loop.bind(this));
     },
 
+    bufferPlay: function(name, ...args) {
+        this.context.resume();
+    },
+
     play: function(name, ...args) {
         this.context.resume();
         return this.methods.play.call(this, ...arguments);
@@ -156,24 +178,6 @@ const AUDIO = {
         for (let [c, v] of this.enableWithClick) {
             v.call();
         }
-    },
-
-    bufferPlay: function(name, { delay = 0, volume = 1, rate = 1 }) {
-        let time = this.time + delay;
-        let names = this.timings.get(time);
-
-        if (!names)
-            this.timings.set(time, names = {});
-
-        let infos = names[name];
-        if (infos) {
-            ++infos[0];
-            infos[1] += volume;
-            infos[2] += rate;
-        } else {
-            names[name] = [1, volume, rate]; //how many, iterated volume, iterated rate => for average
-        }
-
     },
 
     variate(numb, amt /*0 to 1*/ ) {
