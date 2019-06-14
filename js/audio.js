@@ -188,18 +188,19 @@ const AUDIO = {
         this.time = this.context.currentTime;
 
 
+        //bufferplay callbacks
         for (let [time, sounds] of this.timings) {
             if (time - .005 <= this.time) {
                 //make sounds
                 for (let name in sounds) {
                     let [amount, volumes, rates] = sounds[name];
 
-                    let iterations = Math.ceil(amount * .2),
+                    let iterations = Math.ceil(amount * .1),
                         volume = Math.min(volumes / (amount * .1), 2);
 
                     for (; iterations--;) {
                         this.play(name, {
-                            delay: Math.random() * 0.01,
+                            delay: Math.random() * .01,
                             volume: this.variate(volume, .01),
                             rate: this.variate(rates / amount, .01)
                         });
