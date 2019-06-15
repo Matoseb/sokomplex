@@ -21,19 +21,19 @@
     <meta name="theme-color" content="#3e3e3e">
     <style>
         html, body {
-        	font-family: sans-serif;
-        	color: white;
-        	position: fixed;
 			background: black;
-			margin: 0;
-			overflow: hidden;
-			top: 0;
+			bottom: 0;
+        	color: white;
+        	font-family: sans-serif;
+			image-rendering: pixelated;
 			left: 0;
 			right: 0;
-			bottom: 0;
+			margin: 0;
+			overflow: hidden;
+        	position: fixed;
+			top: 0;
 			touch-action: manipulation;
-			image-rendering: pixelated;
-
+			
 			-webkit-user-select: none;  /* Chrome all / Safari all */
   			-moz-user-select: none;     /* Firefox all */
   			-ms-user-select: none;      /* IE 10+ */
@@ -49,7 +49,6 @@
 
 		#webglmessage {
 			align-items: center;
-			
 			display: flex;
 			height: 100%;
 			font-size: 12pt;
@@ -62,35 +61,33 @@
 		}
 
 		#notSupported {
-			width: 100%;
 			height: 100%;
+			width: 100%;
 		}
 
 		input {
-			text-align: center;
-			outline: 0;
 			background: black;
 			border: none;
 			color: white;
-			position: fixed;
+			font-size: 12pt;
 			left: 50%;
+			position: fixed;
+			outline: 0;
+			text-align: center;
 			top: 50%;
 			transform: translate(-50%, -50%);
 		}
 
 		#container {
-			z-index: 1;
-			opacity: 1;
-			transition: opacity 0.5s;
-
-			position: fixed;
-			top: 0;
-			left: 0;
-			right: 0;
 			bottom: 0;
-
-			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+			left: 0;
+			position: fixed;
+			right: 0;
+			top: 0;
         	touch-action: manipulation;
+			transition: opacity 0.5s;
+			z-index: 1;
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   			/*opacity: 1;*/
 		}
 

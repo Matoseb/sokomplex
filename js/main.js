@@ -63,7 +63,6 @@ function checkCheat(e) {
         DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
         DOM.input.onkeypress = function(e) {
             if (e.key === 'Enter') {
-
                 if (!isNaN(this.value)) {
                     let value = +this.value;
 
@@ -78,16 +77,13 @@ function checkCheat(e) {
                 } else {
                     switch (this.value) {
                         case 'm':
-                            for (let s in AUDIO.streams) {
-                                let audio = AUDIO.streams[s].audio;
-                                audio.paused ? audio.play() : audio.pause();
-                            }
+
+                            UTILS.toggleHash('#nomusic');
                             this.blur();
                             break;
                     }
-
-                    this.value = '';
                 }
+                this.value = '';
             }
         }
 

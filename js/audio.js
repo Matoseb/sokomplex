@@ -124,7 +124,7 @@ const AUDIO = {
             return [source, gainNode.gain];
         },
 
-        async stream(name, { loop = true, action, volume, fadeIn }) {
+        async stream(name, { loop = true, volume, fadeIn }) {
             let source = this.streams[name].audio;
             source.loop = loop;
             source.volume = 0.001;
@@ -133,9 +133,11 @@ const AUDIO = {
                 this.enableWithClick.delete(e.target);
                 this.linearRampToValueAtTime(e.target, 'volume', volume, this.context.currentTime + 2);
             }
-            source.play().catch(_ => {
-                this.enableWithClick.set(source, this.stream.bind(this, ...arguments))
-            });
+
+            if (window.location.hash !== '#nomusic')
+                source.play().catch(_ => {
+                    this.enableWithClick.set(source, this.stream.bind(this, ...arguments))
+                });
         },
     },
 
@@ -285,6 +287,14 @@ const AUDIO = {
 
     },
 
+    toggleStreams() {
+        let action = window.location.hash === '#nomusic' ? 'pause' : 'play';
+        for (let s in AUDIO.streams) {
+            let audio = AUDIO.streams[s].audio;
+            audio[action]();
+        }
+    },
+
     continuous(instance, name, overwrite, { asnew = false, loop = true, delay = 0, volume = [], rate = [] }) {
         let contextTime = this.context.currentTime;
         let names = this.continues.get(instance);
@@ -362,17 +372,7 @@ async function initAudio() {
     await AUDIO.ready;
     console.log('audio ready');
 
-    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: 0.5, fadeIn: 2 });
+    AUDIO.stream('backgroundMusic', { loop: true, volume: 0.5, fadeIn: 2 });
 
-    // window.addEventListener('mousedown', function(e) {
-    //     // AUDIO.play('win', { delay: 0, volume: 0.1 });
-    //     console.log(e.detail);
-    // });
-
-    // window.addEventListener('touchstart', function(e) {
-    //     // AUDIO.play('win', { delay: 0, volume: 0.1 });
-    //     var clickEvent = document.createEvent('MouseEvents');
-    //     clickEvent.initEvent('mousedown', true, true);
-    //     window.dispatchEvent(clickEvent);
-    // });
+    window.addEventListener('hashchange', AUDIO.toggleStreams.bind(AUDIO));
 }
