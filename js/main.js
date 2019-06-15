@@ -109,10 +109,11 @@ async function init() {
 
     window.addEventListener('resize', onWindowResize, false);
     window.matchMedia('(orientation: portrait)').addListener(_ => { //home app ios debouncing rotating screen
+        let wait = 60;
         CLOCK.setCallback(_ => {
             let c = DOM.container;
             if (c.offsetWidth !== c.offsetHeight && DOM.width === c.offsetWidth)
-                return 'retry';
+                return --wait; //return if still no change
             onWindowResize();
         });
     });
