@@ -362,12 +362,17 @@ async function initAudio() {
     await AUDIO.ready;
     console.log('audio ready');
 
-    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: 0.8, fadeIn: 2 });
+    AUDIO.stream('backgroundMusic', { loop: true, action: 'play', volume: 0.5, fadeIn: 2 });
 
-    // window.addEventListener('mousedown', function() {
+    // window.addEventListener('mousedown', function(e) {
+    //     // AUDIO.play('win', { delay: 0, volume: 0.1 });
+    //     console.log(e.detail);
+    // });
 
-    //     for (let i = 20; i--;) {
-    //         AUDIO.bufferPlay('slide', { delay: .5, volume: 0.01 });
-    //     }
+    // window.addEventListener('touchstart', function(e) {
+    //     // AUDIO.play('win', { delay: 0, volume: 0.1 });
+    //     var clickEvent = document.createEvent('MouseEvents');
+    //     clickEvent.initEvent('mousedown', true, true);
+    //     window.dispatchEvent(clickEvent);
     // });
 }

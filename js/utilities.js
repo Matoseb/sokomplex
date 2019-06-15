@@ -39,6 +39,95 @@ const DBL_CLICK = {
     }
 }
 
+const TRI_CLICK = {
+
+    target: null,
+    timeout: 0,
+    state: 0,
+    callbacks: [],
+
+    down(target) {
+        this.callbacks.unshift(this.changeState);
+    },
+
+    _up(target) {
+        if (this.changeState(target) || ++this.state < 3)
+            return;
+
+        window.dispatchEvent(new CustomEvent('tripleclick', {
+            detail: { target: this.target }
+        }));
+
+        this.reset(target);
+    },
+
+    up(target) {
+        this.callbacks.unshift(this._up);
+    },
+
+    changeState(target) {
+        clearTimeout(this.timeout);
+        this.timeout = window.setTimeout(this.reset.bind(this), 300);
+        if (this.target !== target) {
+            this.reset(target);
+            return true;
+        }
+    },
+
+    calls() {
+        for (let i = this.callbacks.length; i--;) {
+            this.callbacks.pop().call(this, MOUSE.target);
+        }
+    },
+
+    reset(target) {
+        clearTimeout(this.timeout);
+        this.target = target;
+        this.state = 0;
+    }
+}
+
+// const DBL_CLICK = {
+//     state: 0,
+//     moves: 0,
+//     compare: undefined,
+//     values: [],
+
+//     down(e) {
+//         this.moves = 0;
+//         this.state++;
+//         clearTimeout(this.timeOut);
+//         this.timeOut = setTimeout(_ => {
+//             // console.log('dbl click disabled');
+//             this.state = 0;
+//         }, 700);
+//     },
+
+//     move(e) {
+//         if (this.moves > 8) {
+//             clearTimeout(this.timeOut);
+//             this.state = 0;
+//         }
+//         this.moves++;
+//     },
+
+//     up(e, callback, compare = true) {
+//         clearTimeout(this.timeOut);
+//         if (this.state >= 3) {
+//             if (this.compare === compare) {
+//                 this.state = 0;
+//                 callback(e, compare);
+//             } else {
+//                 this.state = 1;
+//                 this.compare = compare;
+//             }
+//         } else {
+//             this.compare = compare;
+//         }
+//     }
+// }
+
+
 
 const UTILS = {
 

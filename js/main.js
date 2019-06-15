@@ -92,7 +92,7 @@ async function init() {
         if (e.touches.length === 1) {
             onMouseMove(e.touches[0]);
         }
-        
+
     }, { passive: false });
 
     document.addEventListener('mouseup', onMouseUp, false);
@@ -145,7 +145,7 @@ function setupScene() {
 
     DOM.container.appendChild(WORLD.renderer.domElement);
 
-    CAMERA = new THREE.__ObliqueCamera(DOM.width / DOM.height, 1 * 3.2 / 11 /*3 / 11*/ , WORLD_INFO.depthFactor * 3, 0.09);
+    CAMERA = new THREE.__ObliqueCamera(DOM.width / DOM.height, 1 * 3.2 / 11 /*3 / 11*/ , WORLD_INFO.depthFactor * 3, 0.091);
     CAMERA.rotation.x = -Math.PI / 2;
     // CAMERA.position.x = 0;
     // CAMERA.position.z = 0;
@@ -347,9 +347,9 @@ let test = new Map([
 ]);
 
 function onMouseDown(e) {
-
     MOUSE.down(e);
-    DBL_CLICK.down(e);
+    
+    TRI_CLICK.down();
     AUDIO.click();
 
     MOVEMENT.needRecalc = true;
@@ -357,18 +357,21 @@ function onMouseDown(e) {
 }
 
 function onMouseUp(e) {
-
     MOUSE.up(e);
-    DBL_CLICK.up(e, (e, target) => {
-        if (target === PLAYER) {
-            reloadLevel();
-        }
-    }, MOUSE.target);
+
+    TRI_CLICK.up();
 }
+
+window.addEventListener('tripleclick', function(e) {
+    
+    if (e.detail.target === PLAYER) {    
+        reloadLevel();
+    }
+});
 
 function onMouseMove(e) {
     MOUSE.move(e);
-    DBL_CLICK.move(e);
+    // TRI_CLICK.move(e);
 
     MOUSE.needsUpdate = 1;
 
@@ -414,19 +417,18 @@ function render() {
     AUDIO.update();
     MOUSE.updateForces();
     CAMERA.updateEasing();
-
+    TRI_CLICK.calls();
 
     CUBE.material.uniforms.fogHeight.value = CAMERA.ezFogHeight;
     CUBE.material.uniforms.currTime.value = CLOCK.time;
     CUBE.material.uniforms.forces.value = [MOUSE.ezPos3d.x, MOUSE.ezPos3d.z, MOUSE.force3d.x, MOUSE.force3d.y || 1e-9, MOUSE.force3d.z];
     CUBE.instanceBuffer.needsUpdate = true;
 
+    // WORLD.interact = false;
     if (WORLD.interact) {
         blockInteraction();
         CHUNKS_.update(CAMERA.position.x, CAMERA.position.z);
     }
-
-    
 
     if (WORLD.render)
         WORLD.renderer.render(WORLD.scene, CAMERA);

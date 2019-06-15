@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>triple</title>
+    <style type="text/css">
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        background: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    div {
+        width: 50px;
+        height: 50px;
+        background: red;
+        margin: 20px;
+    }
+    </style>
+</head>
+
+<body>
+    <div></div>
+    <div></div>
+    <script type="text/javascript">
+    const TRIPLE = {
+
+        target: null,
+        timeout: 0,
+        state: 0,
+
+        down(e) {
+            this.changeState(e);
+        },
+
+        up(e) {
+            if (this.changeState(e) || ++this.state < 3)
+                return;
+
+            window.dispatchEvent(new CustomEvent('tripleclick', {
+                detail: { target: this.target }
+            }));
+            
+            this.reset(e);
+        },
+
+        changeState(e) {
+            clearTimeout(this.timeout);
+            this.timeout = window.setTimeout(this.reset.bind(this), 300);
+            if (this.target !== e.target) {
+                this.reset(e);
+                return true;
+            }
+        },
+
+        reset(e = {}) {
+            clearTimeout(this.timeout);
+        	this.target = e.target;
+            this.state = 0;
+        }
+    }
+
+    window.addEventListener('tripleclick', function(e) {
+        console.log('poop', e.detail.target);
+    });
+
+    window.addEventListener('mousedown', function(e) {
+        TRIPLE.down(e);
+    });
+
+    window.addEventListener('mouseup', function(e) {
+        TRIPLE.up(e);
+    });
+    </script>
+</body>
+
+</html>
