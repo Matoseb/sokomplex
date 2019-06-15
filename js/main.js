@@ -1,14 +1,8 @@
 'use strict';
 
-
-
-
 if (WEBGL_.isWebGLAvailable() === false) {
-
     document.body.appendChild(WEBGL_.getWebGLErrorMessage());
 }
-
-
 
 const DOM = {
     width: 0,
@@ -139,13 +133,12 @@ function setupScene() {
 
     WORLD.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
 
-
     WORLD.renderer.setPixelRatio(2 || window.devicePixelRatio);
     WORLD.renderer.setSize(DOM.width, DOM.height);
 
     DOM.container.appendChild(WORLD.renderer.domElement);
 
-    CAMERA = new THREE.__ObliqueCamera(DOM.width / DOM.height, 1 * 3.2 / 11 /*3 / 11*/ , WORLD_INFO.depthFactor * 3, 0.091);
+    CAMERA = new THREE.__ObliqueCamera(DOM.width / DOM.height, 1 * 3.2 / 11 /*3 / 11*/ , WORLD_INFO.depthFactor * 3, 0.092);
     CAMERA.rotation.x = -Math.PI / 2;
     // CAMERA.position.x = 0;
     // CAMERA.position.z = 0;
@@ -258,9 +251,6 @@ function setupScene() {
         WORLD.stats = new Stats();
         DOM.container.appendChild(WORLD.stats.dom);
     }
-
-
-
 }
 
 //CUBE FUNCTIONS

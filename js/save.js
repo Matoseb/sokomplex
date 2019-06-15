@@ -68,7 +68,7 @@ const LEVELS = {
     },
 
     clear() {
-        console.log('clearing');
+        // console.log('clearing');
         this.curr = {};
         this.create(0);
     },
@@ -251,7 +251,7 @@ const CALLBACKS = {
                 changes.delay = TELEPORT.delay * (px - TELEPORT.appearX + pz - TELEPORT.appearZ + py * 2);
 
                 let secDelay;
-                if (dist && 0 <= (secDelay = Math.round(changes.delay * 0.001 * 50) * 0.02))
+                if (dist && 0 <= (secDelay = Math.round(changes.delay * 0.001 * 50) * 0.02) && CHUNKS_.inViewport(px, py, pz))
                     AUDIO.bufferPlay('slide', { delay: secDelay, volume: .008 });
             }
 

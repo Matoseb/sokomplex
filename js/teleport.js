@@ -33,7 +33,6 @@ function reloadLevel() {
     AUDIO.play('restart', { volume: .25, rate: 1.01 });
 
     //set player fist !!!!
-
     WORLD.interact = false;
 
     let level = LEVELS.curr[LEVELS.currLevel];
@@ -163,8 +162,8 @@ function loadLevel(num, waitEnd = true, animate = true) {
     TELEPORT.appearX = levelInfo.x;
     TELEPORT.appearZ = levelInfo.z;
     [TELEPORT.newPosX, , TELEPORT.newPosZ] = calcCenterLevel(num);
-    TELEPORT.diffX = TELEPORT.newPosX - Math.round(CAMERA.position.x);
-    TELEPORT.diffZ = TELEPORT.newPosZ - Math.round(CAMERA.position.z);
+    TELEPORT.diffX = Math.round(TELEPORT.newPosX - CAMERA.position.x);
+    TELEPORT.diffZ = Math.round(TELEPORT.newPosZ - CAMERA.position.z);
     TELEPORT.waitEnd = waitEnd;
     TELEPORT.animate = animate;
 
@@ -186,6 +185,7 @@ const CHUNKS_ = {
     unloadList: 0,
     lowest: {},
     bounds: { left: 0, right: 0, top: 0, bottom: 0 },
+    delay: 0,
     newChunks: new Map(),
 
     addChunk(data) {
@@ -193,22 +193,22 @@ const CHUNKS_ = {
         Object.assign(this.lowest, data.lowest);
     },
 
-    calcDelay(y) {
-        return TELEPORT.delay * (this.bounds.right - this.bounds.left + this.bounds.bottom - this.bounds.top + y * 2) + WORLD_INFO.speed;
-    },
     loaded() {
         this.unloadList--;
 
         //when all chunks retrieved
         if (!this.unloadList) {
+            this.delay = 0;
             this.setBounds();
             this.changePlace();
 
-            let y = 0; //add height delay
-            let delay = TELEPORT.waitEnd ? this.calcDelay(y) : 0;
+            let y = WORLD_INFO.y; //add height delay
+
+            let delay = TELEPORT.waitEnd ? this.delay + WORLD_INFO.speed * 0.75 /*this.calcDelay(y)*/ : 0;
 
             CLOCK.setCallback(_ => {
                 WORLD.render = false;
+                this.setBounds();
                 this.clearAllchunks();
                 this.setNewChunks();
                 WORLD.render = true;
@@ -245,9 +245,14 @@ const CHUNKS_ = {
             chunk.clear();
         }
 
+        let interactDelay =
+            TELEPORT.delay *
+            (this.bounds.right - this.bounds.left + this.bounds.bottom - this.bounds.top) +
+            WORLD_INFO.speed;
+
         CLOCK.setCallback(_ => {
             WORLD.interact = true;
-        }, this.calcDelay(0) * 0.5);
+        }, interactDelay * 0.5);
 
         this.lowest = {};
         this.newChunks.clear();
@@ -264,10 +269,21 @@ const CHUNKS_ = {
         this.bounds.bottom = CAMERA.position.z + h_height;
     },
 
+    inViewport(x, y, z) {
+
+        y *= CAMERA.oblique;
+        x-=y;
+        z-=y;
+
+        if ( this.bounds.left < x == x < this.bounds.right &&
+            this.bounds.top < z == z < this.bounds.bottom) {
+            return true;
+        }
+    },
+
     changePlace() {
 
         let remains = {};
-
         let blocksX = Math.ceil(CAMERA.viewWidth / WORLD_INFO.blockSize);
         let blocksZ = Math.ceil(CAMERA.viewHeight / WORLD_INFO.blockSize);
 
@@ -299,8 +315,11 @@ const CHUNKS_ = {
                 let secDelay;
 
                 if (dist && 0 <= (secDelay = Math.round(changes.delay * 0.001 * 50) * 0.02) &&
-                    viewportX <= blocksX && viewportZ <= blocksZ) {
+                    this.inViewport(x, y, z)) {
                     AUDIO.bufferPlay('slide', { delay: secDelay, volume: 0.008 });
+                    if (changes.delay > this.delay) {
+                        this.delay = changes.delay;
+                    }
                 }
 
                 changeCube(instance, changes);
@@ -340,8 +359,10 @@ const CHUNKS_ = {
             for (let z = o.offsetZ; z < o.chunksZ; z++) {
                 this.unloadList++;
                 this.getChunkData([x, 0, z]);
+
             }
         }
+
     },
 
     update(x, z) {
@@ -410,8 +431,8 @@ const CHUNKS_ = {
 }
 
 CALLBACKS.chunkDataLoaded = function(data) {
-    CHUNKS_.loaded();
     CHUNKS_.addChunk(data);
+    CHUNKS_.loaded();
 };
 
 CALLBACKS.emptyChunkDataLoaded = function(data) {
