@@ -5,7 +5,7 @@
     <title>𝗌𝗈𝗄𝗈𝗆𝗉𝗅𝖾𝗑</title>
     <!-- <meta name="viewport" content="width=device-width"> -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Sokomplex" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -21,6 +21,8 @@
     <meta name="theme-color" content="#3e3e3e">
     <style>
         html, body {
+        	font-family: sans-serif;
+        	color: white;
         	position: fixed;
 			background: black;
 			margin: 0;
@@ -47,9 +49,8 @@
 
 		#webglmessage {
 			align-items: center;
-			color: white;
+			
 			display: flex;
-			font-family: sans-serif;
 			height: 100%;
 			font-size: 12pt;
 			justify-content: center;
@@ -63,10 +64,25 @@
 		#notSupported {
 			width: 100%;
 			height: 100%;
+		}
+
+		input {
+			text-align: center;
+			outline: 0;
+			background: black;
+			border: none;
 			color: white;
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
 		}
 
 		#container {
+			z-index: 1;
+			opacity: 1;
+			transition: opacity 0.5s;
+
 			position: fixed;
 			top: 0;
 			left: 0;
@@ -84,6 +100,7 @@
 <body>
     <!-- onclick used to prevent touch-action -->
     <div id="container" onclick></div>
+    <input type="text" value="" pattern="\d*" type="submit" autocomplete="off">
     <script src="js/libs/three.min.js"></script>
     <script src="js/libs/WebGL.js"></script>
     <script src="js/libs/stats.min.js"></script>

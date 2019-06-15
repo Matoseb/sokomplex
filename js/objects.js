@@ -25,7 +25,7 @@ const CLOCK = {
 
     toggle() {
         this.stopped = !this.stopped;
-        console.log(this.stopped);
+        // console.log(this.stopped);
     },
 
     resume() {
@@ -42,8 +42,7 @@ const CLOCK = {
 
         for (let [key, value] of this.callbacks) {
             if (value[0] <= this.time) {
-                value[1]();
-                this.callbacks.delete(key);
+                value[1].call() || this.callbacks.delete(key);
             }
         }
 
@@ -101,7 +100,7 @@ const MOUSE = {
 
             this.target = RAY.cast();
 
-            if(PUSHEDCUBES.get(this.target)) {
+            if (PUSHEDCUBES.get(this.target)) {
                 this.target = undefined;
             }
             // highlightCube(c);
@@ -138,12 +137,12 @@ const RAY = {
             offX =
             1 / CAMERA.zoom -
             CAMERA.oblique * 0.5 -
-            CAMERA.position.x /*+ MOUSE.force3d.y * CAMERA.oblique*/,
+            CAMERA.position.x /*+ MOUSE.force3d.y * CAMERA.oblique*/ ,
 
             offZ =
             1 / (CAMERA.aspect * CAMERA.zoom) -
             CAMERA.oblique * 0.5 -
-            CAMERA.position.z /*+ MOUSE.force3d.y * CAMERA.oblique*/;
+            CAMERA.position.z /*+ MOUSE.force3d.y * CAMERA.oblique*/ ;
 
         this.mouseY = CAMERA.fogHeight - CAMERA.fogOffset; //get player position
         this.mouseX = MOUSE.x + CAMERA.oblique * this.mouseY - offX;
@@ -275,7 +274,7 @@ const KEYBOARD = {
     },
 
     f(key) {
-        console.log('nani', this.keys.get(key));
+        // console.log('nani', this.keys.get(key));
         CLOCK.toggle();
 
         return 1;
@@ -292,42 +291,42 @@ const KEYBOARD = {
         return 1;
     },
 
-    '1'() {
-        loadLevel(1);
-        return 1;
-    },
+    // '1'() {
+    //     loadLevel(1);
+    //     return 1;
+    // },
 
-    '2'() {
-        loadLevel(2);
-        return 1;
-    },
+    // '2'() {
+    //     loadLevel(2);
+    //     return 1;
+    // },
 
-    '3'() {
-        loadLevel(3);
-        return 1;
-    },
+    // '3'() {
+    //     loadLevel(3);
+    //     return 1;
+    // },
 
-    '4'() {
-        loadLevel(4);
-        return 1;
-    },
+    // '4'() {
+    //     loadLevel(4);
+    //     return 1;
+    // },
 
     speed: 0.1,
 
     ArrowRight() {
-        CAMERA.moveTo({x: CAMERA.tPosition.x + this.speed}, true);
+        CAMERA.moveTo({ x: CAMERA.tPosition.x + this.speed }, true);
     },
 
     ArrowLeft() {
-        CAMERA.moveTo({x: CAMERA.tPosition.x - this.speed}, true);
+        CAMERA.moveTo({ x: CAMERA.tPosition.x - this.speed }, true);
     },
 
     ArrowUp() {
-        CAMERA.moveTo({z:CAMERA.tPosition.z - this.speed}, true);
+        CAMERA.moveTo({ z: CAMERA.tPosition.z - this.speed }, true);
     },
 
     ArrowDown() {
-        CAMERA.moveTo({z: CAMERA.tPosition.z + this.speed}, true);
+        CAMERA.moveTo({ z: CAMERA.tPosition.z + this.speed }, true);
     },
 
 }

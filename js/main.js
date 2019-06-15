@@ -56,7 +56,52 @@ const INSTANCES = new Map();
 
 // let CHUNKWORKERS;
 
+function checkCheat(e) {
+    if (e.deltaY < 0 && document.activeElement !== DOM.input && e.clientX > window.innerWidth - 150 && e.clientY > window.innerHeight - 150) {
+        DOM.input.focus();
+        DOM.input.value = '';
+        DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
+        DOM.input.onkeypress = function(e) {
+            if (e.key === 'Enter') {
+
+                if (!isNaN(this.value)) {
+                    let value = +this.value;
+
+                    if (value === 0) {
+                        window.location.reload(true);
+                    } else if (value in WORLD_INFO.levelInfo) {
+                        loadLevel(value);
+                    }
+
+                    this.blur();
+
+                } else {
+                    switch (this.value) {
+                        case 'm':
+                            for (let s in AUDIO.streams) {
+                                let audio = AUDIO.streams[s].audio;
+                                audio.paused ? audio.play() : audio.pause();
+                            }
+                            this.blur();
+                            break;
+                    }
+
+                    this.value = '';
+                }
+            }
+        }
+
+        DOM.input.onblur = function() {
+            DOM.container.removeAttribute('style');
+            this.onblur = this.onkeypress = null;
+        }
+    }
+}
+
 async function init() {
+
+    DOM.input = document.querySelector('input');
+    DOM.container = document.getElementById('container');
 
     setupScene();
     BRUTEFORCE.init(30);
@@ -67,7 +112,17 @@ async function init() {
     WORLD_INFO.setChunkConst();
 
     window.addEventListener('resize', onWindowResize, false);
+    window.matchMedia('(orientation: portrait)').addListener(_ => { //home app ios debouncing rotating screen
+        CLOCK.setCallback(_ => {
+            let c = DOM.container;
+            if (c.offsetWidth !== c.offsetHeight && DOM.width === c.offsetWidth)
+                return 'retry';
+            onWindowResize();
+        });
+    });
+
     document.addEventListener('wheel', function(e) {
+        checkCheat(e);
         if (e.ctrlKey)
             e.preventDefault();
     }, { passive: false });
@@ -85,6 +140,15 @@ async function init() {
         e.preventDefault();
         if (e.touches.length === 1) {
             onMouseMove(e.touches[0]);
+        } else if (e.touches.length === 3) {
+
+            let y = e.touches[0].clientY;
+            if (y > 3 + MOUSE.deltaY) {
+                e.touches[0].deltaY = -1;
+                checkCheat(e.touches[0]);
+            }
+
+            MOUSE.deltaY = y;
         }
 
     }, { passive: false });
@@ -127,7 +191,6 @@ async function init() {
 }
 
 function setupScene() {
-    DOM.container = document.getElementById('container');
     DOM.width = DOM.container.offsetWidth;
     DOM.height = DOM.container.offsetHeight;
 
@@ -338,7 +401,7 @@ let test = new Map([
 
 function onMouseDown(e) {
     MOUSE.down(e);
-    
+
     TRI_CLICK.down();
     AUDIO.click();
 
@@ -353,8 +416,8 @@ function onMouseUp(e) {
 }
 
 window.addEventListener('tripleclick', function(e) {
-    
-    if (e.detail.target === PLAYER) {    
+
+    if (e.detail.target === PLAYER) {
         reloadLevel();
     }
 });
@@ -387,6 +450,9 @@ function onWindowResize() {
 
     WORLD_INFO.setChunkConst();
 }
+
+
+
 
 function update() {
 
