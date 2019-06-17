@@ -128,10 +128,10 @@ const AUDIO = {
             let source = this.streams[name].audio;
             source.loop = loop;
             source.volume = 0.001;
-            source.onplay = async e => {
+            source.onplay = async _ => {
                 await this.streams[name].loaded;
-                this.enableWithClick.delete(e.target);
-                this.linearRampToValueAtTime(e.target, 'volume', volume, this.context.currentTime + 2);
+                this.enableWithClick.delete(source);
+                this.linearRampToValueAtTime(source, 'volume', volume, this.context.currentTime + 2);
             }
 
             if (window.location.hash !== '#nomusic')
