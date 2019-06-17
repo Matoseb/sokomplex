@@ -366,7 +366,7 @@ async function initAudio() {
         'restart': { url: 'rsrc/audio/noise/restart_4.wav', type: 'noise' },
         'button_active': { url: 'rsrc/audio/noise/button_active.wav', type: 'noise' },
         'button_disable': { url: 'rsrc/audio/noise/button_disable.wav', type: 'noise' },
-        'win': { url: 'rsrc/audio/noise/win_3.wav', type: 'noise' },
+        'win': { url: 'rsrc/audio/noise/win_6.wav', type: 'noise' },
     });
 
     await AUDIO.ready;
@@ -375,4 +375,6 @@ async function initAudio() {
     AUDIO.stream('backgroundMusic', { loop: true, volume: 0.5, fadeIn: 2 });
 
     window.addEventListener('hashchange', AUDIO.toggleStreams.bind(AUDIO));
+
+    // window.addEventListener('mousedown', _ => AUDIO.play('win', {delay: 0, volume: 0.4, rate: .9}));
 }

@@ -36,7 +36,6 @@ function reloadLevel() {
     WORLD.interact = false;
 
     let level = LEVELS.curr[LEVELS.currLevel];
-    level.active = 0;
 
     let refs = { moved: 0, _player: PLAYER, movable: level.movable, playerPos: instanceToWorldPos(PLAYER) };
 
@@ -52,8 +51,14 @@ function reloadLevel() {
     if (LEVELS.currLevel) {
         for (let [instance, [origPos, strProps]] of movables) {
             let currPos = instanceToWorldPos(instance);
-            if (currPos + '' !== origPos + '')
+            if (currPos + '' !== origPos + '') {
+
+                let currProps = INSTANCES.get(instance);
+                if (currProps[1] === 2 && currProps[2] === 3)
+                    level.active--;
+
                 respawnBlock(instance, origPos, strProps, refs, currPos);
+            }
         }
     }
     //check movables
@@ -272,10 +277,10 @@ const CHUNKS_ = {
     inViewport(x, y, z) {
 
         y *= CAMERA.oblique;
-        x-=y;
-        z-=y;
+        x -= y;
+        z -= y;
 
-        if ( this.bounds.left < x == x < this.bounds.right &&
+        if (this.bounds.left < x == x < this.bounds.right &&
             this.bounds.top < z == z < this.bounds.bottom) {
             return true;
         }

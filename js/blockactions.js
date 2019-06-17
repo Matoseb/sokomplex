@@ -198,7 +198,6 @@ const MOVETYPES = {
 
         let attributes = this.move(instance, options, wait, undefined, forced);
 
-
         MOVEMENT.wait = 0.8;
 
         if (options.move) {
@@ -293,6 +292,7 @@ const MOVETYPES = {
         if (options.move) {
             //if x z movement
             let hit2 = hit(instance, [0, -1, 0]);
+
             if (hit2.props && hit1.props) {
                 let newLevel = hit2.props[0];
                 if (newLevel === hit1.props[0] && newLevel !== LEVELS.currLevel) {
@@ -412,9 +412,10 @@ function blockInteraction() {
             }
 
             //callback movements
-            if (cb) {
-                for (let i = cb.length; i--;) {
-                    cb.pop().call();
+            if (cb !== undefined) {
+                if (cb.length) {
+                    cb.shift().call();
+                    continue;
                 }
                 CUBECALLBACKS.delete(instance);
             }
@@ -428,7 +429,7 @@ function blockInteraction() {
                     if (instanceProps[1] === 1) {
                         reloadLevel();
                     }
-                    move[1] = 0;
+                    PUSHEDCUBES.delete(instance);
                 } else {
 
                     let opts = { move: move, nBlock: { chunk: chunk, index: index }, speed: Math.max(CUBE.speed.getX(instance) * 0.93, WORLD_INFO.speed * 0.35 /*0.37*/ ) },
@@ -452,9 +453,11 @@ function blockInteraction() {
                     ]
                 });
 
-
                 instanceProps[2] = groundProps[1]; //change appearance
+
+                checkLanding(instance);
                 PUSHEDCUBES.delete(instance);
+
                 changeCube(instance, Object.assign({}, BLOCKTYPE[instanceProps[2]], { speed: 100 }));
                 moveDoors(groundProps[0], coord + '_' + index);
             }
@@ -464,35 +467,38 @@ function blockInteraction() {
 
                 instanceProps[2] = groundProps[1];
                 changeCube(instance, Object.assign({}, BLOCKTYPE[instanceProps[2]], { speed: 100 }));
-                PUSHEDCUBES.delete(instance);
 
+                checkLanding(instance);
+                PUSHEDCUBES.delete(instance);
                 activateGoal(instance, groundProps, 100);
 
                 //wait for finish falling
             } else if (timeDiff >= value.maxWait) {
-
                 //check for fall movement
-                let sound, cont = AUDIO.continues.get(instance);
-                if (cont && (sound = cont.get('fall'))) {
-
-                    AUDIO.play('land', {
-                        volume: Math.min(.03 + sound[3] * 0.03, 0.3),
-                        rate: 1.1 + UTILS.variate(0.15)
-                    });
-
-                    AUDIO.continuous(instance, 'fall', true, {
-                        volume: [
-                            [0.1, 0]
-                        ]
-                    });
-                }
-
+                checkLanding(instance);
                 PUSHEDCUBES.delete(instance);
             }
         }
     }
 
     MOVEMENT.movePlayer(BRUTEFORCE);
+}
+
+function checkLanding(instance) {
+    let sound, cont = AUDIO.continues.get(instance);
+    if (cont && (sound = cont.get('fall'))) {
+
+        AUDIO.play('land', {
+            volume: Math.min(.03 + sound[3] * 0.03, 0.3),
+            rate: 1.1 + UTILS.variate(0.15)
+        });
+
+        AUDIO.continuous(instance, 'fall', true, {
+            volume: [
+                [0.1, 0]
+            ]
+        });
+    }
 }
 
 function activateGoal(box, goalProps, speed) {
@@ -503,7 +509,7 @@ function activateGoal(box, goalProps, speed) {
         loop: false,
         asnew: true,
         rate: [
-            [0, (level.active - level.goals) / level.goals * 0.5 + 1]
+            [0, (level.active - level.goals) / level.goals * 0.5 + .98]
         ],
         volume: [
             [0, 0.15],
@@ -513,7 +519,19 @@ function activateGoal(box, goalProps, speed) {
 
     if (level.active === level.goals) {
 
-        AUDIO.play('win', { delay: 0, volume: 0.4, rate: 1.2});
+        AUDIO.continuous(Symbol(), 'win', true, {
+            loop: false,
+            asnew: true,
+            delay: .03,
+            rate: [
+                [.0, .92],
+                [.25, 1.15],
+            ],
+            volume: [
+                [0, .4],
+                [5, .4]
+            ]
+        });
 
         //activate doors
         if (typeof level.done === "string") {

@@ -17,6 +17,7 @@ const WORLD = {
 }
 
 let CAMERA;
+let LEVEL__ = 1;
 
 const WORLD_INFO = {
     depthFactor: 44,
@@ -27,9 +28,6 @@ const WORLD_INFO = {
     maxHeight: 0,
     minHeight: 0,
     lastIndex: 0,
-
-    buttonOffset: -1 / 4,
-    goalOffset: -1 / 4,
     speed: 222,
 
     setChunkConst() {
@@ -180,7 +178,7 @@ async function init() {
     });
 
     LEVELS.clear();
-    loadLevel(1, false);
+    loadLevel(LEVEL__, false);
 
     initAudio();
 

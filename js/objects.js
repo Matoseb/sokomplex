@@ -137,12 +137,12 @@ const RAY = {
             offX =
             1 / CAMERA.zoom -
             CAMERA.oblique * 0.5 -
-            CAMERA.position.x /*+ MOUSE.force3d.y * CAMERA.oblique*/ ,
+            CAMERA.position.x + MOUSE.force3d.y * CAMERA.oblique ,
 
             offZ =
             1 / (CAMERA.aspect * CAMERA.zoom) -
             CAMERA.oblique * 0.5 -
-            CAMERA.position.z /*+ MOUSE.force3d.y * CAMERA.oblique*/ ;
+            CAMERA.position.z + MOUSE.force3d.y * CAMERA.oblique ;
 
         this.mouseY = CAMERA.fogHeight - CAMERA.fogOffset; //get player position
         this.mouseX = MOUSE.x + CAMERA.oblique * this.mouseY - offX;

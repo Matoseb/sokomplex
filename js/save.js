@@ -102,8 +102,8 @@ const BLOCKTYPE = {
     0: { color: UTILS.packColor(255, 255, 255) }, //wall
     1: { fall: true, color: UTILS.packColor(243, 56, 166) }, //player
     2: { fall: true, color: UTILS.packColor(60, 60, 60) }, //box
-    3: { offset: -1 / 4, color: UTILS.packColor(56, 193, 245), brightness: [70, 35, 35] }, //goal
-    4: { offset: -1 / 4, color: UTILS.packColor(255, 245, 60), brightness: [50, 35, 35] }, //push_button
+    3: { offset: -1 / 5, color: UTILS.packColor(56, 193, 245), brightness: [70, 35, 35] }, //goal
+    4: { offset: -1 / 5, color: UTILS.packColor(255, 245, 60), brightness: [50, 35, 35] }, //push_button
     // 5: { offset: -1 / 4, color: UTILS.packColor(255, 245, 60), brightness: [50, 35, 35] }, //toggle_button
     6: { color: UTILS.packColor(255, 255, 255) }, //door
 
