@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>sokoban</title>
+    <style>
+    html,
+    body {
+        margin: 0;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: black;
+    }
+
+    video {
+        display: none;
+    }
+
+    canvas {
+        object-fit: contain;
+        width: 50%;
+        height: 50%;
+        image-rendering: pixelated;
+    }
+    </style>
+</head>
+
+<body>
+    <canvas></canvas>
+    <video muted loop controls src="vid.mp4"></video>
+    <script>
+    var c = document.querySelector('canvas').getContext('2d');
+    var video = document.querySelector('video');
+
+    video.addEventListener('loadedmetadata', function() {
+        c.canvas.width = this.videoWidth;
+        c.canvas.height = this.videoHeight;
+    });
+
+    video.addEventListener('play', function() {
+
+        requestAnimationFrame(loop.bind(this));
+
+        function loop() {
+            c.drawImage(this, 0, 0);
+            requestAnimationFrame(loop.bind(this));
+        }
+    }, 0);
+    video.play();
+    </script>
+</body>
+
+</html>

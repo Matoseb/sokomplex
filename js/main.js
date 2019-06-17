@@ -197,7 +197,7 @@ function setupScene() {
     DOM.container.appendChild(WORLD.renderer.domElement);
 
     CAMERA = new THREE.__ObliqueCamera(DOM.width / DOM.height, 1 * 3.2 / 11 /*3 / 11*/ , WORLD_INFO.depthFactor * 3, 0.092);
-    CAMERA.rotation.x = -Math.PI / 2;
+    CAMERA.rotation.x = -Math.PI * .5;
     // CAMERA.position.x = 0;
     // CAMERA.position.z = 0;
     // CAMERA.position.y = 1.5;
