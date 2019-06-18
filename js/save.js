@@ -10,7 +10,7 @@ const LEVELS = {
 
     curr: {},
 
-    currLevel: undefined,
+    currLevel: 1,
     addNew(blockId, n_level) {
         if (n_level === 0)
             return;

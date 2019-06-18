@@ -134,7 +134,7 @@ const AUDIO = {
                 this.linearRampToValueAtTime(source, 'volume', volume, this.context.currentTime + 2);
             }
 
-            if (window.location.hash !== '#nomusic')
+            if (URL_.getSearch('music') === 'true')
                 source.play().catch(_ => {
                     this.enableWithClick.set(source, this.stream.bind(this, ...arguments))
                 });
@@ -288,7 +288,7 @@ const AUDIO = {
     },
 
     toggleStreams() {
-        let action = window.location.hash === '#nomusic' ? 'pause' : 'play';
+        let action = URL_.getSearch('music') === 'false' ? 'pause' : 'play';
         for (let s in AUDIO.streams) {
             let audio = AUDIO.streams[s].audio;
             audio[action]();
@@ -374,7 +374,7 @@ async function initAudio() {
 
     AUDIO.stream('backgroundMusic', { loop: true, volume: 0.5, fadeIn: 2 });
 
-    window.addEventListener('hashchange', AUDIO.toggleStreams.bind(AUDIO));
+    window.addEventListener('urlchange', AUDIO.toggleStreams.bind(AUDIO));
 
     // window.addEventListener('mousedown', _ => AUDIO.play('win', {delay: 0, volume: 0.4, rate: .9}));
 }

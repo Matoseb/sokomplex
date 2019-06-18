@@ -76,7 +76,7 @@ function checkCheat(e) {
                     switch (this.value) {
                         case 'm':
 
-                            UTILS.toggleHash('#nomusic');
+                            URL_.toggleSearch('music');
                             this.blur();
                             break;
                     }
@@ -92,12 +92,79 @@ function checkCheat(e) {
     }
 }
 
+const DEMO = {
+
+    callbacks: [],
+
+    init() {
+
+        LEVELS.currLevel = +(URL_.getSearch('level') || LEVELS.currLevel);
+
+        let interval = URL_.getSearch('wave');
+        if (interval) {
+            this.run(interval * 1000, _ => {
+                loadLevel(LEVELS.currLevel);
+            }, +(URL_.getSearch('offset') || 0));
+        }
+    },
+
+    run(interval, func, offset = 0) {
+        let now = new Date();
+        this.callbacks.push({
+            interval: interval,
+            func: func,
+            offset: offset,
+            nextTime: performance.now() + offset + interval -
+                (now.getSeconds() * 1000 + now.getMilliseconds()) % interval
+        });
+    },
+
+    disable() {
+        if (!WORLD.interact)
+            return;
+
+        let nextLevel = URL_.getSearch('next');
+        if (nextLevel)
+            loadLevel(+nextLevel);
+
+        this.callbacks = [];
+        this.disable = UTILS.noop;
+    },
+
+    update() {
+        let currTime = performance.now();
+
+        for (let p of this.callbacks) {
+            if (currTime >= p.nextTime) {
+                p.nextTime += p.interval;
+                p.func.call();
+            }
+        }
+    },
+}
+
 async function init() {
 
     DOM.input = document.querySelector('input');
     DOM.container = document.getElementById('container');
 
     setupScene();
+
+    URL_.setMissing({ music: true });
+
+
+    DEMO.init();
+
+    // var parsedUrl = new URL(window.location.href);
+    // console.log(parsedUrl.searchParams.get("demo"));
+    // var url = new URL(window.location.href.replace(window.location.search, ''));
+    // url.searchParams.append('demo', 42);
+    // url.searchParams.get('demo', 42);
+    // console.log(url, window.location);
+
+    // window.history.replaceState(null, null, url.search);
+
+
     BRUTEFORCE.init(30);
 
     indexedDB.deleteDatabase("appData");
@@ -178,7 +245,7 @@ async function init() {
     });
 
     LEVELS.clear();
-    loadLevel(LEVEL__, false);
+    loadLevel(LEVELS.currLevel, false);
 
     initAudio();
 
@@ -396,6 +463,7 @@ let test = new Map([
 
 function onMouseDown(e) {
     MOUSE.down(e);
+    DEMO.disable();
 
     TRI_CLICK.down();
     AUDIO.click();
@@ -453,6 +521,7 @@ function update() {
 
     requestAnimationFrame(update);
 
+    DEMO.update();
     CLOCK.update();
 
     render();

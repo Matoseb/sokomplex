@@ -127,18 +127,36 @@ const TRI_CLICK = {
 //     }
 // }
 
+const URL_ = {
+    url: new URL(window.location.href),
+    setMissing(searches = {}) {
+        for (let k in searches) {
+            k += '';
+            if (!this.url.searchParams.get(k))
+                this.url.searchParams.set(k, searches[k]);
+        }
+        window.history.replaceState(null, null, this.url.search);
+    },
+    toggleSearch(name) {
+        this.url.searchParams.set(name, this.url.searchParams.get(name) === 'true' ? 'false' : 'true');
+        window.dispatchEvent(new Event('urlchange'));
+        window.history.replaceState(null, null, this.url.search);
+    },
 
+    setSearch(name, state) {
+        this.url.searchParams.set(name, state + '');
+        window.dispatchEvent(new Event('urlchange'));
+        window.history.replaceState(null, null, this.url.search);
+    },
+
+    getSearch(name) {
+        return this.url.searchParams.get(name);
+    },
+}
 
 const UTILS = {
 
-    toggleHash(hash) {
-        if (window.location.hash !== hash) {
-            window.location.hash = hash;
-        } else {
-            window.history.replaceState(null, null, ' ');
-            window.dispatchEvent(new Event('hashchange'));
-        }
-    },
+    noop: function(){},
 
     DeferredPromise: function() {
         let res, rej, p = new Promise(function(resolve, reject) {
