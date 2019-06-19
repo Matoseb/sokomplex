@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>numric keyboard</title>
+    <style type="text/css">
+    html,
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: black;
+    }
+
+    #cheat {
+        --w: 70vmin;
+        outline: 0;
+    }
+
+    input {
+        box-sizing: border-box;
+        padding: 10px;
+        display: inline-block;
+        width: var(--w);
+        border: 0;
+        color: white;
+        background: transparent;
+        outline: none;
+        font-size: initial;
+        text-align: center;
+        /*margin-bottom: 1.2em;*/
+    }
+
+    #cheat:focus-within input {
+        background: rgba(255, 255, 255, .1);
+    }
+
+    #keypad {
+        position: relative;
+        user-select: none;
+        width: var(--w);
+        height: var(--w);
+
+        display: grid;
+        grid-template-areas: "key7 key8 key9 refresh"
+            "key4 key5 key6 delete"
+            "key1 key2 key3 enter"
+            "key0 key0 mute enter";
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+    }
+
+    .key {
+        font-family: sans-serif;
+        color: white;
+        display: flex;
+        align-items: center;
+        background: transparent;
+        justify-content: center;
+        transition: background-color 0.1s;
+    }
+
+    .key:hover {
+        background: rgba(255, 255, 255, .1);
+    }
+
+    .key:hover:active {
+        background: rgba(255, 255, 255, .2);
+    }
+
+    .refresh {
+        grid-area: refresh;
+    }
+
+    .delete {
+        grid-area: delete;
+    }
+
+    .enter {
+        grid-area: enter;
+    }
+
+    .mute {
+        grid-area: mute;
+    }
+
+    ._1 {
+        grid-area: key1;
+    }
+
+    ._2 {
+        grid-area: key2;
+    }
+
+    ._3 {
+        grid-area: key3;
+    }
+
+    ._4 {
+        grid-area: key4;
+    }
+
+    ._5 {
+        grid-area: key5;
+    }
+
+    ._6 {
+        grid-area: key6;
+    }
+
+    ._7 {
+        grid-area: key7;
+    }
+
+    ._8 {
+        grid-area: key8;
+    }
+
+    ._9 {
+        grid-area: key9;
+    }
+
+    ._0 {
+        grid-area: key0;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="cheat" tabindex="-1">
+        <input type="text" name="">
+        <div id="keypad" style="display: none">
+            <div class="key _7">7</div>
+            <div class="key _8">8</div>
+            <div class="key _9">9</div>
+            <div class="key refresh">reload</div>
+            <div class="key _4">4</div>
+            <div class="key _5">5</div>
+            <div class="key _6">6</div>
+            <div class="key delete">delete</div>
+            <div class="key _1">1</div>
+            <div class="key _2">2</div>
+            <div class="key _3">3</div>
+            <div class="key enter">enter</div>
+            <div class="key _0">0</div>
+            <div class="key mute">mute</div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    const UTILS = {
+        isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+    }
+
+    function checkCheat(e) {
+        if (e.deltaY < 0 && document.activeElement !== DOM.input && e.clientX > window.innerWidth - 150 && e.clientY > window.innerHeight - 150) {
+            DOM.input.focus();
+            DOM.input.value = '';
+            DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
+            DOM.input.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    if (!isNaN(this.value)) {
+                        let value = +this.value;
+
+                        if (value === 0) {
+                            window.location.reload(true);
+                        } else if (value in WORLD_INFO.levelInfo) {
+                            loadLevel(value);
+                        }
+
+                        this.blur();
+
+                    } else {
+                        switch (this.value) {
+                            case 'm':
+
+                                URL_.toggleSearch('music');
+                                this.blur();
+                                break;
+                        }
+                    }
+                    this.value = '';
+                }
+            }
+
+            DOM.input.onblur = function() {
+                DOM.container.removeAttribute('style');
+                this.onblur = this.onkeypress = null;
+            }
+        }
+    }
+
+
+
+    const CHEATS = {
+        init() {
+            this.pad = document.getElementById('keypad');
+            this.cheat = document.getElementById('cheat');
+            this.input = document.querySelector('input');
+
+            this.input.onfocus = function() {
+            	console.log('fuck');
+            }
+
+            // if(UTILS.isMobile)
+            this.pad.style.removeProperty('display');
+
+            this.cheat.addEventListener('click', this.click.bind(this));
+            window.addEventListener('keyup', function(e) {
+                // console.log(e.key);
+            });
+        },
+
+        show(e) {
+            let amt = 150;
+            if (e.deltaY < 0 &&
+            	!this.cheat.matches(':focus-within') &&
+                e.clientX > window.innerWidth - amt &&
+                e.clientY > window.innerHeight - amt) {
+
+            	console.log('nani');
+            }
+        },
+
+        click(e) {
+
+            if (!e.target.classList.contains('key'))
+                return;
+
+            let key = e.target.textContent;
+
+            if (key in this.special) {
+                this.special[key].call(this);
+            } else {
+                this.input.value += key;
+            }
+        },
+
+        special: {
+            delete() {
+                let value = this.input.value;
+                this.input.value = value.slice(0, -1);
+            },
+
+            mute() {
+                window.dispatchEvent(new KeyboardEvent('keyup', { key: 'm' }));
+            },
+
+            reload() {
+                window.dispatchEvent(new KeyboardEvent('keyup', { key: 'r' }));
+            },
+
+            enter() {
+                window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
+            }
+        }
+    }
+
+
+    CHEATS.init();
+    window.addEventListener('wheel', function(e) {
+        CHEATS.show(e);
+    });
+    </script>
+</body>
+
+</html>

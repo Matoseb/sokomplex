@@ -156,7 +156,9 @@ const URL_ = {
 
 const UTILS = {
 
-    noop: function(){},
+    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+
+    noop: function() {},
 
     DeferredPromise: function() {
         let res, rej, p = new Promise(function(resolve, reject) {

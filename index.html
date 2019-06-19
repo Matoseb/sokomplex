@@ -33,7 +33,7 @@
         	position: fixed;
 			top: 0;
 			touch-action: manipulation;
-			
+
 			-webkit-user-select: none;  /* Chrome all / Safari all */
   			-moz-user-select: none;     /* Firefox all */
   			-ms-user-select: none;      /* IE 10+ */
@@ -65,18 +65,120 @@
 			width: 100%;
 		}
 
-		input {
-			background: black;
-			border: none;
-			color: white;
-			font-size: 12pt;
-			left: 50%;
+		#cheat {
 			position: fixed;
-			outline: 0;
-			text-align: center;
-			top: 50%;
-			transform: translate(-50%, -50%);
-		}
+    	top: 50%;
+    	left: 50%;
+    	transform: translate(-50%, -50%);
+        --w: 70vmin;
+        outline: 0;
+    }
+
+    input {
+        box-sizing: border-box;
+        padding: 10px;
+        display: inline-block;
+        width: var(--w);
+        border: 0;
+        color: white;
+        background: transparent;
+        outline: none;
+        font-size: initial;
+        text-align: center;
+        /*margin-bottom: 1.2em;*/
+    }
+
+    #cheat:focus-within input {
+        background: rgba(255, 255, 255, .1);
+    }
+
+    #keypad {
+    	display: none;
+        position: relative;
+        user-select: none;
+        width: var(--w);
+        height: var(--w);
+        grid-template-areas: "key7 key8 key9 refresh"
+            "key4 key5 key6 delete"
+            "key1 key2 key3 enter"
+            "key0 key0 mute enter";
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+    }
+
+    .key {
+        font-family: sans-serif;
+        color: white;
+        display: flex;
+        align-items: center;
+        background: transparent;
+        justify-content: center;
+        transition: background-color 0.1s;
+    }
+
+    .key:hover {
+        background: rgba(255, 255, 255, .1);
+    }
+
+    .key:hover:active {
+        background: rgba(255, 255, 255, .2);
+    }
+
+    .refresh {
+        grid-area: refresh;
+    }
+
+    .delete {
+        grid-area: delete;
+    }
+
+    .enter {
+        grid-area: enter;
+    }
+
+    .mute {
+        grid-area: mute;
+    }
+
+    ._1 {
+        grid-area: key1;
+    }
+
+    ._2 {
+        grid-area: key2;
+    }
+
+    ._3 {
+        grid-area: key3;
+    }
+
+    ._4 {
+        grid-area: key4;
+    }
+
+    ._5 {
+        grid-area: key5;
+    }
+
+    ._6 {
+        grid-area: key6;
+    }
+
+    ._7 {
+        grid-area: key7;
+    }
+
+    ._8 {
+        grid-area: key8;
+    }
+
+    ._9 {
+        grid-area: key9;
+    }
+
+    ._0 {
+        grid-area: key0;
+    }
 
 		#container {
 			bottom: 0;
@@ -97,7 +199,26 @@
 <body>
     <!-- onclick used to prevent touch-action -->
     <div id="container" onclick></div>
-    <input type="text" value="" pattern="\d*" type="submit" autocomplete="off">
+    <!-- <input type="text" value="" autocomplete="off"> -->
+    <div id="cheat" tabindex="-1">
+        <input type="text" name="">
+        <div id="keypad" style="">
+            <div class="key _7">7</div>
+            <div class="key _8">8</div>
+            <div class="key _9">9</div>
+            <div class="key refresh">reload</div>
+            <div class="key _4">4</div>
+            <div class="key _5">5</div>
+            <div class="key _6">6</div>
+            <div class="key delete">delete</div>
+            <div class="key _1">1</div>
+            <div class="key _2">2</div>
+            <div class="key _3">3</div>
+            <div class="key enter">enter</div>
+            <div class="key _0">0</div>
+            <div class="key mute">mute</div>
+        </div>
+    </div>
     <script src="js/libs/three.min.js"></script>
     <script src="js/libs/WebGL.js"></script>
     <script src="js/libs/stats.min.js"></script>

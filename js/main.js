@@ -54,43 +54,153 @@ const INSTANCES = new Map();
 
 // let CHUNKWORKERS;
 
-function checkCheat(e) {
-    if (e.deltaY < 0 && document.activeElement !== DOM.input && e.clientX > window.innerWidth - 150 && e.clientY > window.innerHeight - 150) {
-        DOM.input.focus();
-        DOM.input.value = '';
-        DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
-        DOM.input.onkeypress = function(e) {
-            if (e.key === 'Enter') {
-                if (!isNaN(this.value)) {
-                    let value = +this.value;
+const CHEATS = {
+    init() {
+        DOM.pad = document.getElementById('keypad');
+        DOM.cheat = document.getElementById('cheat');
+        DOM.input = document.querySelector('input');
 
-                    if (value === 0) {
-                        window.location.reload(true);
-                    } else if (value in WORLD_INFO.levelInfo) {
-                        loadLevel(value);
+        if (!UTILS.isMobile)
+            DOM.pad.style.display = 'grid';
+        DOM.cheat.addEventListener('click', this.click.bind(this));
+    },
+
+    show(e) {
+        let amt = 150;
+        if (e.deltaY < 0 &&
+            !DOM.cheat.matches(':focus-within') &&
+            e.clientX > window.innerWidth - amt &&
+            e.clientY > window.innerHeight - amt) {
+
+            DOM.input.focus();
+            DOM.input.value = '';
+            DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
+
+            WORLD.interact = false;
+            DOM.input.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    if (!isNaN(this.value)) {
+                        let value = +this.value;
+                        if (value && value in WORLD_INFO.levelInfo) {
+                            loadLevel(value);
+                        }
+
+                        document.activeElement.blur();
+
+                    } else {
+                        console.log(this.value);
+                        switch (this.value) {
+                            case 'r':
+                                window.location.reload(true);
+                                break;
+                            case 'm':
+                                URL_.toggleSearch('music');
+                                break;
+                        }
+                        WORLD.interact = true;
+                        document.activeElement.blur();
                     }
 
-                    this.blur();
-
-                } else {
-                    switch (this.value) {
-                        case 'm':
-
-                            URL_.toggleSearch('music');
-                            this.blur();
-                            break;
-                    }
+                    this.value = '';
+                } else if (e.key === 'Reload') {
+                    document.activeElement.blur();
+                    WORLD.interact = true;
+                    window.location.reload(true);
+                    this.value = '';
+                } else if (e.key === 'Mute') {
+                    document.activeElement.blur();
+                    WORLD.interact = true;
+                    URL_.toggleSearch('music');
+                    this.value = '';
                 }
-                this.value = '';
             }
-        }
 
-        DOM.input.onblur = function() {
-            DOM.container.removeAttribute('style');
-            this.onblur = this.onkeypress = null;
+            DOM.input.onblur = DOM.cheat.onblur = this.onblur;
+        }
+    },
+
+    onblur(e) {
+        if (DOM.cheat.contains(e.relatedTarget))
+            return;
+
+        DOM.container.removeAttribute('style');
+        DOM.input.onkeypress = null;
+    },
+
+    click(e) {
+
+        if (!e.target.classList.contains('key'))
+            return;
+
+        let key = e.target.textContent;
+
+        if (key in this.special) {
+            this.special[key].call(this);
+        } else {
+            DOM.input.value += key;
+        }
+    },
+
+    special: {
+        delete() {
+            let value = DOM.input.value;
+            DOM.input.value = value.slice(0, -1);
+        },
+
+        mute() {
+            DOM.input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Mute' }));
+        },
+
+        reload() {
+            DOM.input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Reload' }));
+            DOM.input.value += 'r';
+        },
+
+        enter() {
+            DOM.input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter' }));
         }
     }
 }
+
+
+
+// function checkCheat(e) {
+//     if (e.deltaY < 0 && document.activeElement !== DOM.input && e.clientX > window.innerWidth - 150 && e.clientY > window.innerHeight - 150) {
+//         DOM.input.focus();
+//         DOM.input.value = '';
+//         DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
+//         DOM.input.onkeypress = function(e) {
+//             if (e.key === 'Enter') {
+//                 if (!isNaN(this.value)) {
+//                     let value = +this.value;
+
+//                     if (value === 0) {
+//                         window.location.reload(true);
+//                     } else if (value in WORLD_INFO.levelInfo) {
+//                         loadLevel(value);
+//                     }
+
+//                     this.blur();
+
+//                 } else {
+//                     switch (this.value) {
+//                         case 'm':
+
+//                             URL_.toggleSearch('music');
+//                             this.blur();
+//                             break;
+//                     }
+//                 }
+//                 this.value = '';
+//             }
+//         }
+
+//         DOM.input.onblur = function() {
+//             DOM.container.removeAttribute('style');
+//             this.onblur = this.onkeypress = null;
+//         }
+//     }
+// }
 
 const DEMO = {
 
@@ -145,18 +255,17 @@ const DEMO = {
 
 async function init() {
 
-    DOM.input = document.querySelector('input');
     DOM.container = document.getElementById('container');
-
     setupScene();
 
     URL_.setMissing({ music: true });
 
 
     DEMO.init();
+    CHEATS.init();
 
-    // var parsedUrl = new URL(window.location.href);
     // console.log(parsedUrl.searchParams.get("demo"));
+    // var parsedUrl = new URL(window.location.href);
     // var url = new URL(window.location.href.replace(window.location.search, ''));
     // url.searchParams.append('demo', 42);
     // url.searchParams.get('demo', 42);
@@ -184,7 +293,7 @@ async function init() {
     });
 
     document.addEventListener('wheel', function(e) {
-        checkCheat(e);
+        CHEATS.show(e);
         if (e.ctrlKey)
             e.preventDefault();
     }, { passive: false });
@@ -207,7 +316,7 @@ async function init() {
             let y = e.touches[0].clientY;
             if (y > 3 + MOUSE.deltaY) {
                 e.touches[0].deltaY = -1;
-                checkCheat(e.touches[0]);
+                CHEATS.show(e.touches[0]);
             }
 
             MOUSE.deltaY = y;
