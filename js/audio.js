@@ -90,7 +90,7 @@ const AUDIO = {
     //methods that needs user input to work properly, are overwritten when user input
     methods: {
 
-        bufferPlay: function(name, { delay = 0, volume = 1, rate = 1 }) {
+        bufferPlay(name, { delay = 0, volume = 1, rate = 1 }) {
             let time = this.time + delay;
             let names = this.timings.get(time);
 
@@ -108,7 +108,7 @@ const AUDIO = {
 
         },
 
-        play: function(name, { delay = 0, volume = 1, rate = 1, loop = false }) {
+        play(name, { delay = 0, volume = 1, rate = 1, loop = false }) {
 
             let gainNode = this.context.createGain();
             let source = this.context.createBufferSource();
@@ -124,6 +124,12 @@ const AUDIO = {
             return [source, gainNode.gain];
         },
 
+        click() {
+            for (let [c, v] of this.enableWithClick) {
+                v.call();
+            }
+        },
+
         async stream(name, { loop = true, volume, fadeIn }) {
             let source = this.streams[name].audio;
             source.loop = loop;
@@ -134,10 +140,12 @@ const AUDIO = {
                 this.linearRampToValueAtTime(source, 'volume', volume, this.context.currentTime + 2);
             }
 
-            if (URL_.getSearch('music') === 'true')
+            if (URL_.getSearch('music') === 'true') {
                 source.play().catch(_ => {
                     this.enableWithClick.set(source, this.stream.bind(this, ...arguments))
                 });
+            }
+
         },
     },
 
@@ -159,27 +167,25 @@ const AUDIO = {
         media[prop + '_frame'] = requestAnimationFrame(loop.bind(this));
     },
 
-    bufferPlay: function(name, ...args) {
+    bufferPlay(name, ...args) {
         this.context.resume();
     },
 
-    play: function(name, ...args) {
+    play(name, ...args) {
         this.context.resume();
         return this.methods.play.call(this, ...arguments);
     },
 
-    stream: function(name, ...args) {
+    stream(name, ...args) {
         this.context.resume();
-
-        let n = this.methods.stream.call(this, ...arguments);
+        return this.methods.stream.call(this, ...arguments);
     },
 
     enableWithClick: new Map(),
 
     click() {
-        for (let [c, v] of this.enableWithClick) {
-            v.call();
-        }
+        this.context.resume();
+        return this.methods.click.call(this, ...arguments);
     },
 
     variate(numb, amt /*0 to 1*/ ) {
