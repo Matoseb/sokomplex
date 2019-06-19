@@ -252,6 +252,7 @@ const KEYBOARD = {
         }
     },
 
+    reset() { this.keys.clear() },
     down(e) {
         if (this.pressed)
             return;
@@ -260,36 +261,35 @@ const KEYBOARD = {
         this.pressed = true;
     },
 
-    reset() { this.keys.clear() },
 
     up(e) {
         this.keys.delete(e.key);
         this.pressed = false;
     },
 
-    q() {
-        // CAMERA.position.y += CAMERA.speed;
-        CAMERA.proportionalZoom(0.001);
-        WORLD_INFO.setChunkConst();
-    },
+    // q() {
+    //     // CAMERA.position.y += CAMERA.speed;
+    //     CAMERA.proportionalZoom(0.001);
+    //     WORLD_INFO.setChunkConst();
+    // },
 
-    f(key) {
-        // console.log('nani', this.keys.get(key));
-        CLOCK.toggle();
+    // f(key) {
+    //     // console.log('nani', this.keys.get(key));
+    //     CLOCK.toggle();
 
-        return 1;
-    },
+    //     return 1;
+    // },
 
-    e() {
-        // CAMERA.position.y -= CAMERA.speed;
-        CAMERA.proportionalZoom(-0.001);
-        WORLD_INFO.setChunkConst();
-    },
+    // e() {
+    //     // CAMERA.position.y -= CAMERA.speed;
+    //     CAMERA.proportionalZoom(-0.001);
+    //     WORLD_INFO.setChunkConst();
+    // },
 
-    r() {
-        reloadLevel();
-        return 1;
-    },
+    // r() {
+    //     reloadLevel();
+    //     return 1;
+    // },
 
     // '1'() {
     //     loadLevel(1);
@@ -313,20 +313,20 @@ const KEYBOARD = {
 
     speed: 0.1,
 
-    ArrowRight() {
-        CAMERA.moveTo({ x: CAMERA.tPosition.x + this.speed }, true);
-    },
+    // ArrowRight() {
+    //     CAMERA.moveTo({ x: CAMERA.tPosition.x + this.speed }, true);
+    // },
 
-    ArrowLeft() {
-        CAMERA.moveTo({ x: CAMERA.tPosition.x - this.speed }, true);
-    },
+    // ArrowLeft() {
+    //     CAMERA.moveTo({ x: CAMERA.tPosition.x - this.speed }, true);
+    // },
 
-    ArrowUp() {
-        CAMERA.moveTo({ z: CAMERA.tPosition.z - this.speed }, true);
-    },
+    // ArrowUp() {
+    //     CAMERA.moveTo({ z: CAMERA.tPosition.z - this.speed }, true);
+    // },
 
-    ArrowDown() {
-        CAMERA.moveTo({ z: CAMERA.tPosition.z + this.speed }, true);
-    },
+    // ArrowDown() {
+    //     CAMERA.moveTo({ z: CAMERA.tPosition.z + this.speed }, true);
+    // },
 
 }
