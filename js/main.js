@@ -83,12 +83,13 @@ const CHEATS = {
                         let value = +this.value;
                         if (value && value in WORLD_INFO.levelInfo) {
                             loadLevel(value);
+                        } else {
+                            WORLD.interact = true;
                         }
 
                         document.activeElement.blur();
 
                     } else {
-                        console.log(this.value);
                         switch (this.value) {
                             case 'r':
                                 window.location.reload(true);
@@ -96,7 +97,11 @@ const CHEATS = {
                             case 'm':
                                 URL_.toggleSearch('music');
                                 break;
+                            default:
+                                if (this.value.includes('/'))
+                                    window.location.href = this.value;
                         }
+
                         WORLD.interact = true;
                         document.activeElement.blur();
                     }
@@ -112,6 +117,8 @@ const CHEATS = {
                     WORLD.interact = true;
                     URL_.toggleSearch('music');
                     this.value = '';
+                } else if (e.key === 'u' && !this.value) {
+                    this.value = window.location.href;
                 }
             }
 
@@ -134,30 +141,34 @@ const CHEATS = {
 
         let key = e.target.textContent;
 
-        if (key in this.special) {
-            this.special[key].call(this);
-        } else {
-            DOM.input.value += key;
-        }
+        (this.special[key] || this.special['default']).call(DOM.input, key);
     },
 
     special: {
         delete() {
             let value = DOM.input.value;
-            DOM.input.value = value.slice(0, -1);
+            this.value = value.slice(0, -1);
         },
 
         mute() {
-            DOM.input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Mute' }));
+            this.dispatchEvent(new KeyboardEvent('keypress', { key: 'Mute' }));
+        },
+
+        url() {
+            this.value = window.location.href;
         },
 
         reload() {
-            DOM.input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Reload' }));
-            DOM.input.value += 'r';
+            this.dispatchEvent(new KeyboardEvent('keypress', { key: 'Reload' }));
+            this.value += 'r';
         },
 
         enter() {
-            DOM.input.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter' }));
+            this.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter' }));
+        },
+
+        default (key) {
+            this.value += key;
         }
     }
 }
