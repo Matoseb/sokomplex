@@ -156,6 +156,7 @@ function getLowest(currPos, movable) {
 
 function loadLevel(num, waitEnd = true, animate = true) {
     WORLD.interact = false;
+    WORLD.loadingLevel = true;
 
     LEVELS.currLevel = num;
     LEVELS.create(num);
@@ -257,6 +258,7 @@ const CHUNKS_ = {
 
         CLOCK.setCallback(_ => {
             WORLD.interact = true;
+            WORLD.loadingLevel = false;
         }, interactDelay * 0.5);
 
         this.lowest = {};

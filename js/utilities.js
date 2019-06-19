@@ -1,44 +1,5 @@
 'use strict';
 
-// const DBL_CLICK = {
-//     state: 0,
-//     moves: 0,
-//     compare: undefined,
-
-//     down(e) {
-//         this.moves = 0;
-//         this.state++;
-//         clearTimeout(this.timeOut);
-//         this.timeOut = setTimeout(_ => {
-//             // console.log('dbl click disabled');
-//             this.state = 0;
-//         }, 700);
-//     },
-
-//     move(e) {
-//         if (this.moves > 8) {
-//             clearTimeout(this.timeOut);
-//             this.state = 0;
-//         }
-//         this.moves++;
-//     },
-
-//     up(e, callback, compare = true) {
-//         clearTimeout(this.timeOut);
-//         if (this.state >= 2) {
-//             if (this.compare === compare) {
-//                 this.state = 0;
-//                 callback(e, compare);
-//             } else {
-//                 this.state = 1;
-//                 this.compare = compare;
-//             }
-//         } else {
-//             this.compare = compare;
-//         }
-//     }
-// }
-
 const TRI_CLICK = {
 
     target: null,

@@ -13,6 +13,7 @@ const DOM = {
 const WORLD = {
     render: true,
     interact: false,
+    loadingLevel: false
     //renderer, scene, stats
 }
 
@@ -81,10 +82,9 @@ const CHEATS = {
                 if (e.key === 'Enter') {
                     if (!isNaN(this.value)) {
                         let value = +this.value;
+
                         if (value && value in WORLD_INFO.levelInfo) {
                             loadLevel(value);
-                        } else {
-                            WORLD.interact = true;
                         }
 
                         document.activeElement.blur();
@@ -102,19 +102,16 @@ const CHEATS = {
                                     window.location.href = this.value;
                         }
 
-                        WORLD.interact = true;
                         document.activeElement.blur();
                     }
 
                     this.value = '';
                 } else if (e.key === 'Reload') {
                     document.activeElement.blur();
-                    WORLD.interact = true;
                     window.location.reload(true);
                     this.value = '';
                 } else if (e.key === 'Mute') {
                     document.activeElement.blur();
-                    WORLD.interact = true;
                     URL_.toggleSearch('music');
                     this.value = '';
                 } else if (e.key === 'u' && !this.value) {
@@ -132,6 +129,7 @@ const CHEATS = {
 
         DOM.container.removeAttribute('style');
         DOM.input.onkeypress = null;
+        WORLD.interact = !WORLD.loadingLevel;
     },
 
     click(e) {
