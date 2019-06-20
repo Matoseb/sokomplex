@@ -22,7 +22,7 @@ const AUDIO = {
     async init(bufferInfo) {
         this.context = new(window.AudioContext || window.webkitAudioContext)();
 
-        this.context.resume().then(this.enable.bind(this));
+        this.getAuthorization();
 
         this.sounds = bufferInfo;
 
@@ -149,6 +149,40 @@ const AUDIO = {
         },
     },
 
+    getAuthorization() {
+
+        if (this.author.play === this.play)
+            return;
+
+        this.allowed = new UTILS.DeferredPromise();
+        this.context.resume().then(this.enable.bind(this));
+
+        for (let key in this.author) {
+            this[key] = this.author[key];
+        }
+    },
+
+    author: {
+        bufferPlay(name, ...args) {
+            AUDIO.context.resume();
+        },
+
+        play(name, ...args) {
+            this.context.resume();
+            return this.methods.play.call(this, ...arguments);
+        },
+
+        stream(name, ...args) {
+            this.context.resume();
+            return this.methods.stream.call(this, ...arguments);
+        },
+
+        click() {
+            this.context.resume();
+            return this.methods.click.call(this, ...arguments);
+        },
+    },
+
     linearRampToValueAtTime(media, prop, newValue, time) {
         let _time = this.context.currentTime;
         let _value = media[prop];
@@ -167,26 +201,7 @@ const AUDIO = {
         media[prop + '_frame'] = requestAnimationFrame(loop.bind(this));
     },
 
-    bufferPlay(name, ...args) {
-        this.context.resume();
-    },
-
-    play(name, ...args) {
-        this.context.resume();
-        return this.methods.play.call(this, ...arguments);
-    },
-
-    stream(name, ...args) {
-        this.context.resume();
-        return this.methods.stream.call(this, ...arguments);
-    },
-
     enableWithClick: new Map(),
-
-    click() {
-        this.context.resume();
-        return this.methods.click.call(this, ...arguments);
-    },
 
     variate(numb, amt /*0 to 1*/ ) {
         return numb - numb * (Math.random() * amt - amt * .5);

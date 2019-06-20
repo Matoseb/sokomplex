@@ -171,8 +171,6 @@ const CHEATS = {
     }
 }
 
-
-
 // function checkCheat(e) {
 //     if (e.deltaY < 0 && document.activeElement !== DOM.input && e.clientX > window.innerWidth - 150 && e.clientY > window.innerHeight - 150) {
 //         DOM.input.focus();
@@ -263,7 +261,6 @@ const DEMO = {
 }
 
 async function init() {
-
     DOM.container = document.getElementById('container');
     setupScene();
 
@@ -290,13 +287,22 @@ async function init() {
 
     WORLD_INFO.setChunkConst();
 
-
-
     window.addEventListener('resize', onWindowResize, false);
-
 
     window.addEventListener('visibilitychange', function() {
         AUDIO.muteStreams(document.visibilityState === 'hidden');
+        if (document.visibilityState === 'visible')
+            AUDIO.getAuthorization();
+    }, false);
+
+
+    window.addEventListener("focus", function(evt) {
+        AUDIO.getAuthorization();
+        AUDIO.muteStreams(false);
+    }, false);
+
+    window.addEventListener("blur", function(evt) {
+        AUDIO.muteStreams(true);
     }, false);
 
     window.matchMedia('(orientation: portrait)').addListener(_ => { //home app ios debouncing rotating screen
