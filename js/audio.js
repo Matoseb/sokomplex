@@ -301,6 +301,12 @@ const AUDIO = {
         }
     },
 
+    muteStreams(mute) {
+        for (let s in AUDIO.streams) {
+            let audio = AUDIO.streams[s].audio.muted = mute;
+        }
+    },
+
     continuous(instance, name, overwrite, { asnew = false, loop = true, delay = 0, volume = [], rate = [] }) {
         let contextTime = this.context.currentTime;
         let names = this.continues.get(instance);

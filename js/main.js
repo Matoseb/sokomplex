@@ -290,7 +290,15 @@ async function init() {
 
     WORLD_INFO.setChunkConst();
 
+
+
     window.addEventListener('resize', onWindowResize, false);
+
+
+    window.addEventListener('visibilitychange', function() {
+        AUDIO.muteStreams(document.visibilityState === 'hidden');
+    }, false);
+
     window.matchMedia('(orientation: portrait)').addListener(_ => { //home app ios debouncing rotating screen
         let wait = 60;
         CLOCK.setCallback(_ => {
