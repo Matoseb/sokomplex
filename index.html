@@ -5,6 +5,10 @@
     <title>𝗌𝗈𝗄𝗈𝗆𝗉𝗅𝖾𝗑</title>
     <!-- <meta name="viewport" content="width=device-width"> -->
     <meta charset="utf-8">
+    <meta name=”description” content="Puzzle game inspired by Sokoban. It is part of my diploma project at ecal. Alpha Version.">
+    <meta name="keywords" content="Sokoban,webgl,puzzle,game,javaScript">
+    <meta name="author" content="Sébastien Matos">
+
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Sokomplex" />
@@ -21,55 +25,55 @@
     <meta name="theme-color" content="#3e3e3e">
     <style>
         html, body {
-			background: black;
-			bottom: 0;
-        	color: white;
-        	font-family: sans-serif;
-			image-rendering: pixelated;
-			left: 0;
-			right: 0;
-			margin: 0;
-			overflow: hidden;
-        	position: fixed;
-			top: 0;
-			touch-action: manipulation;
+            background: black;
+            bottom: 0;
+            color: white;
+            font-family: sans-serif;
+            image-rendering: pixelated;
+            left: 0;
+            right: 0;
+            margin: 0;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            touch-action: manipulation;
 
-			-webkit-user-select: none;  /* Chrome all / Safari all */
-  			-moz-user-select: none;     /* Firefox all */
-  			-ms-user-select: none;      /* IE 10+ */
-  			user-select: none;          /* Likely future */      
-		}
+            -webkit-user-select: none;  /* Chrome all / Safari all */
+            -moz-user-select: none;     /* Firefox all */
+            -ms-user-select: none;      /* IE 10+ */
+            user-select: none;          /* Likely future */      
+        }
 
-		#info {
-			position: absolute;
-			top: 0px;
-			width: 100%;
-			padding: 5px;
-		}
+        #info {
+            position: absolute;
+            top: 0px;
+            width: 100%;
+            padding: 5px;
+        }
 
-		#webglmessage {
-			align-items: center;
-			display: flex;
-			height: 100%;
-			font-size: 12pt;
-			justify-content: center;
-			position: absolute;
-			opacity: 0;
-			transition: opacity 1s;
-			text-align: center;
-			width: 100%;
-		}
+        #webglmessage {
+            align-items: center;
+            display: flex;
+            height: 100%;
+            font-size: 12pt;
+            justify-content: center;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s;
+            text-align: center;
+            width: 100%;
+        }
 
-		#notSupported {
-			height: 100%;
-			width: 100%;
-		}
+        #notSupported {
+            height: 100%;
+            width: 100%;
+        }
 
-		#cheat {
-			position: fixed;
-    	top: 50%;
-    	left: 50%;
-    	transform: translate(-50%, -50%);
+        #cheat {
+            position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         --w: 70vmin;
         outline: 0;
     }
@@ -93,7 +97,7 @@
     }
 
     #keypad {
-    	display: none;
+        display: none;
         position: relative;
         user-select: none;
         width: var(--w);
@@ -184,20 +188,20 @@
         grid-area: key0;
     }
 
-		#container {
-			bottom: 0;
-			left: 0;
-			position: fixed;
-			right: 0;
-			top: 0;
-        	touch-action: manipulation;
-			transition: opacity 0.5s;
-			z-index: 1;
-			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  			/*opacity: 1;*/
-		}
+        #container {
+            bottom: 0;
+            left: 0;
+            position: fixed;
+            right: 0;
+            top: 0;
+            touch-action: manipulation;
+            transition: opacity 0.5s;
+            z-index: 1;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            /*opacity: 1;*/
+        }
 
-	</style>
+    </style>
 </head>
 
 <body>
@@ -237,85 +241,85 @@
     <script id="vertexShader" type="x-shader/x-vertex">
         precision highp float;
 
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
-		uniform float fogHeight;
-		uniform float currTime;
-		uniform float depthFactor;
-		// uniform vec3 downForce[1];
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        uniform float fogHeight;
+        uniform float currTime;
+        uniform float depthFactor;
+        // uniform vec3 downForce[1];
 
-		uniform float forces[5];		//[mouse 3d x, mouse 3d y, force x, force y, force z]
+        uniform float forces[5];        //[mouse 3d x, mouse 3d y, force x, force y, force z]
 
-		const float sq256 = 256. * 256.;
+        const float sq256 = 256. * 256.;
 
-		const float sq461 = 512. * 512.;
+        const float sq461 = 512. * 512.;
 
-		const float mag = 4.;
+        const float mag = 4.;
 
-		attribute vec3 vertexPos;	//posistion of vertices
-		attribute vec2 uv;
-		
-		attribute vec3 _pos;
-		attribute vec3 pos;
+        attribute vec3 vertexPos;   //posistion of vertices
+        attribute vec2 uv;
+        
+        attribute vec3 _pos;
+        attribute vec3 pos;
 
-		attribute float _col;
-		attribute float col;
+        attribute float _col;
+        attribute float col;
 
-		attribute float _time;
-		attribute float speed;
+        attribute float _time;
+        attribute float speed;
 
-		varying vec2 vUv;
-		varying vec3 vColors;
-		varying float vPosY;
+        varying vec2 vUv;
+        varying vec3 vColors;
+        varying float vPosY;
 
-    	// float easeOutCubic (float t) {return (--t)*t*t+1.0;}
-		float easeOutQuad (const in float t) { return t*(2.0-t); }
+        // float easeOutCubic (float t) {return (--t)*t*t+1.0;}
+        float easeOutQuad (const in float t) { return t*(2.0-t); }
 
-		float sq (const in float n) { return n*n; }
+        float sq (const in float n) { return n*n; }
 
-		vec3 unpackColor(const in float f) {
-		    vec3 color;
-		    color.b = floor(f / sq461);
-		    float tmp = f - color.b * sq461;
-		    color.g = floor(tmp / 512.);
-		    color.r = floor(tmp - color.g * 512.);
-		    return color / 255.;
-		}
+        vec3 unpackColor(const in float f) {
+            vec3 color;
+            color.b = floor(f / sq461);
+            float tmp = f - color.b * sq461;
+            color.g = floor(tmp / 512.);
+            color.r = floor(tmp - color.g * 512.);
+            return color / 255.;
+        }
 
-		void main() {
-			vUv = uv;
-			
-			vec3 col_ = unpackColor(col);
-			vec3 _col_ = unpackColor(_col);
-			vec3 vPos = vertexPos;
+        void main() {
+            vUv = uv;
+            
+            vec3 col_ = unpackColor(col);
+            vec3 _col_ = unpackColor(_col);
+            vec3 vPos = vertexPos;
 
-			//interpolation
-			float eased = easeOutQuad(clamp((currTime - _time)/speed,0.,1.));
+            //interpolation
+            float eased = easeOutQuad(clamp((currTime - _time)/speed,0.,1.));
 
-			vec3 easedPos = (pos - _pos) * eased + _pos;
-			float forceAmt = -(sq(easedPos.x - forces[0]) + sq(easedPos.z - forces[1])) / sq(mag * forces[3]);
+            vec3 easedPos = (pos - _pos) * eased + _pos;
+            float forceAmt = -(sq(easedPos.x - forces[0]) + sq(easedPos.z - forces[1])) / sq(mag * forces[3]);
 
-			vPos += easedPos - vec3(forces[2], forces[3], forces[4]) * pow(2.,forceAmt);
-			vColors = (col_ - _col_) * eased + _col_;
+            vPos += easedPos - vec3(forces[2], forces[3], forces[4]) * pow(2.,forceAmt);
+            vColors = (col_ - _col_) * eased + _col_;
 
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos, 1. );
-           			
-			vPosY = easeOutQuad(abs(fogHeight - vPos.y)/depthFactor);
-		}
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( vPos, 1. );
+                    
+            vPosY = easeOutQuad(abs(fogHeight - vPos.y)/depthFactor);
+        }
 
-	</script>
+    </script>
     <script id="fragmentShader" type="x-shader/x-fragment">
         precision highp float;
 
-		uniform sampler2D map;
-		varying vec2 vUv;
-		varying float vPosY;
-		varying vec3 vColors;
+        uniform sampler2D map;
+        varying vec2 vUv;
+        varying float vPosY;
+        varying vec3 vColors;
 
-		void main() {
-			gl_FragColor = vec4(vColors * texture2D(map, vUv).rgb - vPosY,1.);
-		}
-	</script>
+        void main() {
+            gl_FragColor = vec4(vColors * texture2D(map, vUv).rgb - vPosY,1.);
+        }
+    </script>
     <script src="js/main.js"></script>
 </body>
 
