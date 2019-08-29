@@ -8,7 +8,6 @@
     <meta name=”description” content="Puzzle game inspired by Sokoban. It is part of my diploma project at ecal. Alpha Version.">
     <meta name="keywords" content="Sokoban,webgl,puzzle,game,javaScript">
     <meta name="author" content="Sébastien Matos">
-
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Sokomplex" />
@@ -24,6 +23,11 @@
     <meta name="msapplication-config" content="/favicon/browserconfig.xml">
     <meta name="theme-color" content="#3e3e3e">
     <style>
+        :root {
+            --marg: 2ch;
+            --col: rgb(20,20,20);
+        }
+
         html, body {
             background: black;
             bottom: 0;
@@ -188,18 +192,219 @@
         grid-area: key0;
     }
 
-        #container {
-            bottom: 0;
-            left: 0;
-            position: fixed;
-            right: 0;
-            top: 0;
-            touch-action: manipulation;
-            transition: opacity 0.5s;
-            z-index: 1;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-            /*opacity: 1;*/
+    .help_btn {
+        background: rgba(50,50,50,.9);
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: var(--marg);
+        width: 2.5em;
+        height: 2.5em;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .help_close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 2.5em;
+        height: 2.5em;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn {
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn:hover {
+        background: rgba(100,100,100,.7);
+    }
+
+    .btn:active,
+    .btn.check {
+        color: black;
+        background: white;
+    }
+
+    #container {
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        right: 0;
+        top: 0;
+        touch-action: manipulation;
+        transition: opacity 0.5s;
+        z-index: 1;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    #container.disable {
+        pointer-events: none;
+        opacity: .05;
+    }
+
+
+    :focus {
+        outline: none;
+    }
+
+
+    /*help menu*/
+    .help_container {
+        mix-blend-mode: screen;
+        font-family: helvetica, sans-serif;
+        text-align: justify;
+        color: white;
+        padding: var(--marg);
+        box-sizing: border-box;
+        display: grid;
+        grid-gap: var(--marg);
+        grid-template-areas: "infos levels"
+            "tutorial levels";
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+
+        position: absolute;
+        background: var(--col);
+        width: calc(100% - var(--marg) * 2);
+        height: calc(100% - var(--marg) * 2);
+        top: var(--marg);
+        left: var(--marg);
+    }
+
+    @media only screen and (orientation : portrait) {
+        .help_container {
+            grid-template-areas: "infos"
+            "tutorial"
+            "levels";
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
         }
+    }
+
+    @media only screen and (max-device-width : 768px) {
+        .levels_grid {
+            grid-template-columns: repeat(auto-fill, minmax(3rem, 2fr));
+        }
+    }
+
+    .help_container>section {
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .help_container>section::before {
+        content: '';
+        position: relative;
+        top: 100%;
+        pointer-events: none;
+        z-index: 10;
+        box-shadow: 0 0 calc(var(--marg) * .5) calc(var(--marg) * .5) var(--col);
+    }
+
+    .help_container .content {
+        /*hyphens: manual;*/
+        display: inline;
+        z-index: 0;
+        padding-top: var(--marg);
+        padding-bottom: var(--marg);
+        /*height: auto;*/
+        overflow: auto;
+        position: relative;
+    }
+
+    .info_text {
+        white-space: pre-line;
+    }
+
+    .title {
+        text-transform: uppercase;
+        white-space: pre-line;
+        box-shadow: 0 0 calc(var(--marg) * .5) calc(var(--marg) * .5) var(--col);
+        z-index: 1;
+        position: relative;
+        margin: 0;
+    }
+
+    .infos {
+        grid-area: infos;
+    }
+
+    .levels_container {
+        overflow: auto;
+    }
+
+    .levels_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(7rem, 2fr));
+        grid-auto-rows: 1fr;
+    }
+
+    .levels_grid::before {
+        content: '';
+        width: 0;
+        padding-bottom: 100%;
+        grid-row: 1 / 1;
+        grid-column: 1 / 1;
+    }
+
+    .lvl_btn:first-child {
+        grid-row: 1 / 1;
+        grid-column: 1 / 1;
+    }
+
+    .lvl_btn {
+        user-select: none;
+        outline: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+
+    .content a {
+        color: white;
+    }
+
+    .levels {
+        grid-area: levels;
+    }
+
+    .tutorial {
+        grid-area: tutorial;
+    }
+
+    .tuto_container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden !important;
+        shape-rendering: optimizeSpeed;
+    }
+
+    .content::-webkit-scrollbar {
+        width: 1em;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+        background: white;
+        background-clip: padding-box;
+        border-top: solid var(--marg) transparent;
+        border-bottom: solid var(--marg) transparent;
+        border-left: solid 0.9em transparent;
+    }
+
+    .hide {
+        display: none;
+    }
 
     </style>
 </head>
@@ -207,6 +412,35 @@
 <body>
     <!-- onclick used to prevent touch-action -->
     <div id="container" onclick></div>
+    <div class="help_btn btn hide">𝗂</div>
+    <div tabindex="-1" class="help_container hide">
+        <div class="help_close btn">✕</div>
+        <section class="infos">
+            <h3 class="title" id="info_title">Sokomplex</h3>
+            <div class="info_text content">Sokomplex pays tribute to the Sokoban puzzle video game series, first released in 1982. The main purpose was to push boxes onto target squares in a labyrinth.
+                The contribution of a three-dimensional environment entirely composed of cubes now allows the use of brand new game mechanics, thus considerably varying the gameplay. This open world makes it possible to move away from the well-known level system of «puzzle games». Designed using web technologies, the game is available on every connected platforms.
+
+                Project by ECAL/Sébastien Matos
+                Tutors: Alain Bellet, Christophe Guignard, Gaël Hugo, Pauline Saglio
+                Assistants: Pietro Alberti, Laura Perrenoud, Callum Ross, Tibor Udvari
+                ECAL / University of Art and Design, Lausanne Switzerland
+                Bachelor Media & Interaction Design
+                ecal.ch + ECAL - Bachelor Media&Interaction Design
+            </div>
+        </section>
+        <section class="levels">
+            <h3 class="title" id="levels_title">Levels</h3>
+            <div class="levels_container content">
+                <div class="levels_grid">
+                </div>
+            </div>
+        </section>
+        <section class="tutorial">
+            <h3 class="title" id="tuto_title">Controls</h3>
+            <div class="tuto_container content">
+            </div>
+        </section>
+    </div>
     <!-- <input type="text" value="" autocomplete="off"> -->
     <div id="cheat" tabindex="-1">
         <input type="text" autocorrect="off" autocapitalize="none">
@@ -228,6 +462,7 @@
             <div class="key mute">mute</div>
         </div>
     </div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.5.7/lottie_html.min.js"></script>
     <script src="js/libs/three.min.js"></script>
     <script src="js/libs/WebGL.js"></script>
     <script src="js/libs/stats.min.js"></script>

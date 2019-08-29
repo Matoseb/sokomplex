@@ -118,7 +118,10 @@ const AUDIO = {
             source.buffer = this.buffers[name];
             source.playbackRate.value = rate;
             source.loop = loop;
-            source.connect(gainNode).connect(this.nodes[this.sounds[name].type]);
+
+            gainNode.connect(this.nodes[this.sounds[name].type]);
+            source.connect(gainNode);
+
             source.start(this.context.currentTime + delay);
 
             return [source, gainNode.gain];

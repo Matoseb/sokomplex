@@ -171,6 +171,215 @@ const CHEATS = {
     }
 }
 
+const HELP = {
+
+    init() {
+        DOM.helpBtn = document.querySelector('.help_btn');
+        DOM.helpBtn.classList.remove('hide');
+
+        DOM.helpContainer = document.querySelector('.help_container');
+        DOM.helpClose = document.querySelector('.help_close');
+        DOM.helpGrid = document.querySelector('.levels .levels_grid');
+
+        // DOM.cheat.addEventListener('click', this.click.bind(this));
+
+
+        if (UTILS.isMobile) {
+            this.clickTouchTarget(DOM.helpGrid, this.clickLevelBtn.bind(this));
+            this.clickTouchTarget(DOM.helpClose, _ => { DOM.helpContainer.blur() });
+            this.touchEvent(DOM.helpBtn, 'touchstart', this.down.bind(this));
+            this.touchEvent(DOM.helpBtn, 'touchend', this.up.bind(this));
+
+            DOM.helpContainer.addEventListener('touchmove', e => {
+                e.stopPropagation();
+            }, true);
+
+        } else {
+
+            DOM.helpGrid.addEventListener('click', this.clickLevelBtn.bind(this), true);
+            DOM.helpClose.addEventListener('click', _ => { DOM.helpContainer.blur() }, true);
+            DOM.helpBtn.addEventListener('mouseup', this.up.bind(this), true);
+            DOM.helpBtn.addEventListener('mousedown', this.down.bind(this), true);
+
+        }
+
+
+        DOM.helpContainer.onblur = this.onblur.bind(this);
+
+        this.generateLevelButtons();
+
+        //load animated tutorial
+        this.animation1 = bodymovin.loadAnimation({
+            wrapper: document.querySelector('.tuto_container'),
+            animType: 'svg',
+            loop: true,
+            prerender: true,
+            path: '../rsrc/tuto/animation1_data.json'
+        });
+    },
+
+    resetTimer(seconds = 60) {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(this.resetLevel.bind(this), seconds * 1000);
+    },
+
+    resetLevel() {
+        console.log('reset');
+        loadLevel(1);
+        if (WORLD.interact) {
+            loadLevel(1);
+        } else {
+            this.resetTimer();
+        }
+    },
+
+    touchEvent(dom, event, callback) {
+        dom.addEventListener(event, e => {
+            if (e.touches.length <= 1) {
+                callback(e);
+            }
+        }, true);
+    },
+
+    clickTouchTarget(dom, callback) {
+        dom.addEventListener('touchend', e => {
+
+            let cTouch = e.changedTouches[0];
+            let elem = document.elementFromPoint(cTouch.clientX, cTouch.clientY);
+
+            if (dom === elem || dom.contains(elem)) {
+                callback(Object.assign({}, e, { target: elem }));
+            }
+        }, true);
+    },
+
+    generateLevelButtons() {
+        let nLevels = Object.keys(WORLD_INFO.levelInfo).length;
+        let frag = document.createDocumentFragment();
+
+        for (let i = 1; i < nLevels; i++) {
+            let btn = document.createElement('div');
+            // btn.tabIndex = -1;
+            btn.className = `lvl_btn btn`;
+            btn.dataset.level = i;
+
+            btn.innerText = i;
+            frag.appendChild(btn);
+        }
+
+        DOM.helpGrid.appendChild(frag);
+    },
+
+    clickLevelBtn(e) {
+        if (e.target.classList.contains('lvl_btn')) {
+
+            let targLevel = +e.target.dataset.level;
+
+            this.select(targLevel);
+            DOM.helpContainer.blur();
+
+            if (LEVELS.currLevel !== targLevel) {
+                loadLevel(targLevel);
+            }
+        }
+    },
+
+    select(n) {
+        let checked = DOM.helpGrid.querySelector('.check');
+        if (checked)
+            checked.classList.remove('check');
+
+        DOM.helpGrid.querySelector(`[data-level='${n}']`).classList.add('check');
+
+        // loadLevel(value);
+    },
+
+    hide(e) {
+        WORLD.render = true;
+
+        setTimeout(_ => {
+            if (!WORLD.loadingLevel)
+                WORLD.interact = true;
+        }, 200);
+
+        DOM.container.classList.remove('disable');
+        DOM.helpContainer.classList.add('hide');
+        DOM.helpBtn.classList.remove('hide');
+
+        this.animation1.pause();
+    },
+
+    down(e) {
+        e.stopPropagation();
+    },
+
+    //show
+    up(e) {
+
+        if (WORLD.loadingLevel)
+            return;
+
+        WORLD.interact = WORLD.render = false;
+
+        DOM.container.classList.add('disable');
+        DOM.helpContainer.classList.remove('hide');
+        DOM.helpBtn.classList.add('hide');
+        DOM.helpContainer.focus();
+
+        this.select(LEVELS.currLevel);
+        this.animation1.play();
+    },
+
+    onblur(e) {
+        // console.log('hey');
+        this.hide(e);
+        // if (DOM.cheat.contains(e.relatedTarget))
+        //     return;
+
+        // DOM.container.removeAttribute('style');
+        // DOM.input.onkeypress = null;
+        // WORLD.interact = !WORLD.loadingLevel;
+    },
+
+    // click(e) {
+
+    //     if (!e.target.classList.contains('key'))
+    //         return;
+
+    //     let key = e.target.textContent;
+
+    //     (this.special[key] || this.special['default']).call(DOM.input, key);
+    // },
+
+    // special: {
+    //     delete() {
+    //         let value = DOM.input.value;
+    //         this.value = value.slice(0, -1);
+    //     },
+
+    //     mute() {
+    //         this.dispatchEvent(new KeyboardEvent('keypress', { key: 'Mute' }));
+    //     },
+
+    //     url() {
+    //         this.value = window.location.href;
+    //     },
+
+    //     reload() {
+    //         this.dispatchEvent(new KeyboardEvent('keypress', { key: 'Reload' }));
+    //         this.value += 'r';
+    //     },
+
+    //     enter() {
+    //         this.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter' }));
+    //     },
+
+    //     default (key) {
+    //         this.value += key;
+    //     }
+    // }
+}
+
 // function checkCheat(e) {
 //     if (e.deltaY < 0 && document.activeElement !== DOM.input && e.clientX > window.innerWidth - 150 && e.clientY > window.innerHeight - 150) {
 //         DOM.input.focus();
@@ -264,7 +473,7 @@ async function init() {
     DOM.container = document.getElementById('container');
     setupScene();
 
-    URL_.setMissing({ music: true });
+    URL_.setMissing({ music: true, expo: false });
 
 
     DEMO.init();
@@ -284,6 +493,10 @@ async function init() {
 
     indexedDB.deleteDatabase("appData");
     await setupSavingSystem(2);
+
+    if (URL_.getSearch('expo') === 'true') {
+        HELP.init();
+    }
 
     WORLD_INFO.setChunkConst();
 
@@ -331,6 +544,7 @@ async function init() {
     });
 
     document.addEventListener('touchmove', function(e) {
+
         e.preventDefault();
         if (e.touches.length === 1) {
             onMouseMove(e.touches[0]);
@@ -597,6 +811,8 @@ function onMouseDown(e) {
     MOUSE.down(e);
     DEMO.disable();
 
+    HELP.resetTimer();
+
     TRI_CLICK.down();
     AUDIO.click();
 
@@ -619,6 +835,7 @@ window.addEventListener('tripleclick', function(e) {
 
 function onMouseMove(e) {
     MOUSE.move(e);
+    HELP.resetTimer();
     // TRI_CLICK.move(e);
 
     MOUSE.needsUpdate = 1;
