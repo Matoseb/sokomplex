@@ -73,6 +73,8 @@ const CHEATS = {
             e.clientX > window.innerWidth - amt &&
             e.clientY > window.innerHeight - amt) {
 
+
+            DOM.cheat.style.display = '';
             DOM.input.focus();
             DOM.input.value = '';
             DOM.container.setAttribute("style", "opacity: 0.1; pointer-events: none;");
@@ -128,6 +130,7 @@ const CHEATS = {
             return;
 
         DOM.container.removeAttribute('style');
+        DOM.cheat.style.display = 'none';
         DOM.input.onkeypress = null;
         WORLD.interact = !WORLD.loadingLevel;
     },

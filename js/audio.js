@@ -385,7 +385,7 @@ const AUDIO = {
 async function initAudio() {
 
     AUDIO.init({
-        'backgroundMusic': { url: 'rsrc/audio/music/ambient_1.mp3', type: 'music', stream: true },
+        'backgroundMusic': { url: 'rsrc/audio/music/ambient_2.mp3', type: 'music', stream: true },
         'slide': { url: 'rsrc/audio/noise/slide_2.wav', type: 'noise' },
         'slidebox': { url: 'rsrc/audio/noise/slidebox_2.wav', type: 'noise' },
         'fall': { url: 'rsrc/audio/noise/fall_2.wav', type: 'noise' },
