@@ -476,7 +476,7 @@ async function init() {
     DOM.container = document.getElementById('container');
     setupScene();
 
-    URL_.setMissing({ music: true, expo: false });
+    URL_.setMissing({ music: true, expo: true });
 
 
     DEMO.init();
