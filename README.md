@@ -6,10 +6,10 @@ Designed using web technologies, the game is available on a multitude of connect
 
 New levels will be added soon, hopefully.
 
+------
 Diploma project, [ECAL](https://ecal.ch/en/100/homepage) 2019
 in [BACHELOR MEDIA & INTERACTION DESIGN](https://ecal.ch/en/1103/studies/bachelor/media-interaction-design/presentation)
 by SÉBASTIEN MATOS
-
 Teacher(s): Alain Bellet, Pauline Saglio, Gaël Hugo, Christophe Guignard
 
 [![Sokomplex Trailer](https://ecal.ch/download/webmedia/068c830e8ad1b3f846ac5bd504be3d73_th4@2x.jpg/sokomplex-24176.jpg)](https://vimeo.com/361070000 "Sokomplex Trailer")
